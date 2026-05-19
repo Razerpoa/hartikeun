@@ -4,6 +4,7 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type, Modality } from '@google/genai';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -15,6 +16,29 @@ const ai = new GoogleGenAI({
     }
   }
 });
+
+// Load custom dictionary once at startup
+let customDictText = '';
+const dictLoadPath = path.join(process.cwd(), 'custom_dictionary.json');
+if (fs.existsSync(dictLoadPath)) {
+  try {
+    const dictContent = fs.readFileSync(dictLoadPath, 'utf-8');
+    const dict = JSON.parse(dictContent);
+    if (Object.keys(dict).length > 0) {
+      customDictText = `\nCustom Dictionary (Priority):\n${JSON.stringify(dict)}`;
+    }
+  } catch (e) {
+    console.error('Error parsing custom dictionary:', e);
+  }
+}
+
+// Graceful shutdown handlers
+const handleShutdown = (signal: string) => {
+  console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
+  process.exit(0);
+};
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT', () => handleShutdown('SIGINT'));
 
 async function startServer() {
   const app = express();
@@ -59,6 +83,7 @@ async function startServer() {
     return `${prefix}:${lang}${extra ? ':' + extra : ''}:${canonical}`;
   }
 
+  app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -183,20 +208,6 @@ CRITICAL RULES:
     }
 
     try {
-      let customDictText = '';
-      const dictPath = path.join(process.cwd(), 'custom_dictionary.json');
-      if (fs.existsSync(dictPath)) {
-        try {
-          const dictContent = fs.readFileSync(dictPath, 'utf-8');
-          const dict = JSON.parse(dictContent);
-          if (Object.keys(dict).length > 0) {
-            customDictText = `\nCustom Dictionary (Priority):\n${JSON.stringify(dict)}`;
-          }
-        } catch (e) {
-          console.error('Error parsing custom dictionary:', e);
-        }
-      }
-
       const contents: any[] = [{
         role: 'user',
         parts: [
