@@ -89,7 +89,7 @@ JSON EXAMPLE FOR CHAT:
     {
       "sender_type": "other",
       "original_text": "Cuy, ntar ulin moal?",
-      "translations": { "formal_indonesian": "Teman, nanti jadi bermain tidak?", "daily_indonesian": "Bro, nanti jadi main gak?", "professional_english": "Hey, are we hanging out later?" },
+      "translations": { "formal_indonesian": "Teman, nanti jadi bermain tidak?", "daily_indonesian": "Cuy, nanti jadi main gak?", "professional_english": "Hey, are we hanging out later?" },
       "vocabulary_breakdown": [
         { "original_word": "ulin", "meaning_and_context": "Bermain (Sundanese)", "is_proper_name": false },
         { "original_word": "moal", "meaning_and_context": "Tidak akan (Sundanese)", "is_proper_name": false }
