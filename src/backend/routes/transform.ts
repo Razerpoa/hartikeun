@@ -4,16 +4,19 @@ import { config } from '../config.js';
 import { info, error as logError } from '../logger.js';
 import { normalizeSlang, getCacheKey } from '../utils.js';
 import type { GoogleGenAI } from '@google/genai';
+import type { WordCache } from '../services/cache.js';
 
 interface RouteDeps {
   ai: GoogleGenAI;
-  wordCache: Record<string, unknown>;
-  saveCache: () => void;
+  wordCache: WordCache;
   customDictText: string;
 }
 
+const MAX_TEXT_LENGTH = 5000;
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
 export function registerTransformRoute(app: Express, deps: RouteDeps): void {
-  const { ai, wordCache, saveCache, customDictText } = deps;
+  const { ai, wordCache, customDictText } = deps;
 
   app.post('/api/transform', async (req, res) => {
     const { text, tone = 50, lang = 'id', image } = req.body;
@@ -22,13 +25,29 @@ export function registerTransformRoute(app: Express, deps: RouteDeps): void {
       return res.status(400).json({ error: 'Text or image is required' });
     }
 
+    // Input validation
+    if (text && typeof text === 'string' && text.length > MAX_TEXT_LENGTH) {
+      return res.status(400).json({ error: `Text must be at most ${MAX_TEXT_LENGTH} characters` });
+    }
+
+    if (image && typeof image === 'string') {
+      const base64Data = image.split(',')[1] || image;
+      const decodedLength = Buffer.byteLength(base64Data, 'base64');
+      if (decodedLength > MAX_IMAGE_SIZE_BYTES) {
+        return res.status(400).json({ error: 'Image must be at most 5MB after decoding' });
+      }
+    }
+
     const normalizedText = text ? normalizeSlang(text) : '(No text provided, see image)';
 
     // We don't cache image requests for now to avoid huge cache files
     const cacheKey = !image ? getCacheKey('transform', lang, normalizedText, tone.toString()) : null;
-    if (cacheKey && wordCache[cacheKey]) {
-      info(`[Cache Hit] Transform: ${cacheKey}`);
-      return res.json(wordCache[cacheKey]);
+    if (cacheKey) {
+      const cached = wordCache.get(cacheKey);
+      if (cached) {
+        info(`[Cache Hit] Transform: ${cacheKey}`);
+        return res.json(cached);
+      }
     }
 
     if (cacheKey) {
@@ -222,8 +241,7 @@ CRITICAL RULES:
       }
       const result = JSON.parse(responseText);
       if (cacheKey) {
-        wordCache[cacheKey] = result;
-        saveCache();
+        wordCache.set(cacheKey, result);
       }
       res.json(result);
     } catch (error) {
