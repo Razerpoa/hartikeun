@@ -1,0 +1,8 @@
+{
+  "name": "Hartikeun",
+  "description": "Hartikeun (Translate/Explain) - A specialized Sundanese and Indonesian dialect explorer that bridges regional expressions, slang, and cultural context.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
