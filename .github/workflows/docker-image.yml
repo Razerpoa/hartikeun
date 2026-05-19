@@ -63,6 +63,6 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: hartikeun-service
-          region: us-central1
+          region: asia-southeast1
           # This forces the exact Docker Hub tag format: username/hartikeun:sha-9450241
           image: ${{ secrets.DOCKERHUB_USERNAME }}/hartikeun:sha-${{ github.sha }}
