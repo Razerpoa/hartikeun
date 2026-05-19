@@ -65,4 +65,4 @@ jobs:
           service: hartikeun
           region: asia-southeast1
           # This forces the exact Docker Hub tag format: username/hartikeun:sha-9450241
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/hartikeun:sha-latest
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/hartikeun:latest
