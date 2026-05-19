@@ -7,6 +7,9 @@ interface RouteDeps {
   ai: GoogleGenAI;
 }
 
+// Gemini TTS voice whitelist
+const ALLOWED_VOICES = new Set(['Kore', 'Leda', 'Aoede', 'Puck', 'Charon', 'Fenrir', 'Arctos']);
+
 export function registerTtsRoute(app: Express, deps: RouteDeps): void {
   const { ai } = deps;
 
@@ -15,6 +18,10 @@ export function registerTtsRoute(app: Express, deps: RouteDeps): void {
 
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
+    }
+
+    if (!ALLOWED_VOICES.has(voice)) {
+      return res.status(400).json({ error: `Voice must be one of: ${[...ALLOWED_VOICES].join(', ')}` });
     }
 
     try {

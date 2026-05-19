@@ -4,15 +4,15 @@ import { config } from '../config.js';
 import { info, error as logError } from '../logger.js';
 import { normalizeSlang, getCacheKey } from '../utils.js';
 import type { GoogleGenAI } from '@google/genai';
+import type { WordCache } from '../services/cache.js';
 
 interface RouteDeps {
   ai: GoogleGenAI;
-  wordCache: Record<string, unknown>;
-  saveCache: () => void;
+  wordCache: WordCache;
 }
 
 export function registerWordDetailsRoute(app: Express, deps: RouteDeps): void {
-  const { ai, wordCache, saveCache } = deps;
+  const { ai, wordCache } = deps;
 
   app.post('/api/word-details', async (req, res) => {
     const { word, lang = 'id', context = '' } = req.body;
@@ -25,9 +25,10 @@ export function registerWordDetailsRoute(app: Express, deps: RouteDeps): void {
     // Include context in cache key to allow context-specific deep dives if the AI adjusts focus
     const cacheKey = getCacheKey('details', lang, normalizedWord, context ? `ctx:${context.substring(0, 20)}` : undefined);
 
-    if (wordCache[cacheKey]) {
+    const cached = wordCache.get(cacheKey);
+    if (cached) {
       info(`[Cache Hit] Word details: ${cacheKey}`);
-      return res.json(wordCache[cacheKey]);
+      return res.json(cached);
     }
 
     info(`[Cache Miss] Fetching word details: ${cacheKey} (Original: ${word})`);
@@ -89,8 +90,7 @@ export function registerWordDetailsRoute(app: Express, deps: RouteDeps): void {
         throw new Error('Empty response from AI model');
       }
       const result = JSON.parse(responseText);
-      wordCache[cacheKey] = result;
-      saveCache();
+      wordCache.set(cacheKey, result);
       res.json(result);
     } catch (e) {
       logError('Error fetching word details:', e);

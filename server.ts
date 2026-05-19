@@ -5,7 +5,12 @@ import fs from 'fs';
 import { config } from './src/backend/config.js';
 import { info, warn, error as logError } from './src/backend/logger.js';
 import { ai } from './src/backend/services/gemini.js';
-import { loadCache, saveCache as saveCacheImpl } from './src/backend/services/cache.js';
+import {
+  loadCache,
+  persistCache,
+  startCachePersistence,
+  stopCachePersistence,
+} from './src/backend/services/cache.js';
 import { createApp } from './src/backend/app.js';
 
 dotenv.config();
@@ -27,18 +32,22 @@ if (fs.existsSync(dictLoadPath)) {
 
 // Load word cache at startup
 const wordCache = loadCache();
-const saveCache = () => saveCacheImpl(wordCache);
+
+// Periodic persistence every 5 minutes
+startCachePersistence(wordCache);
 
 // Graceful shutdown handlers
 const handleShutdown = (signal: string) => {
   info(`Received ${signal}. Shutting down gracefully...`);
+  stopCachePersistence();
+  persistCache(wordCache);
   process.exit(0);
 };
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 
 async function startServer() {
-  const app = await createApp({ ai, wordCache, saveCache, customDictText });
+  const app = await createApp({ ai, wordCache, customDictText });
 
   app.listen(config.PORT, '0.0.0.0', () => {
     info(`Server running on http://localhost:${config.PORT}`);

@@ -6,6 +6,7 @@ export const ai = new GoogleGenAI({
   httpOptions: {
     headers: {
       'User-Agent': 'aistudio-build',
-    }
-  }
+    },
+    timeout: config.REQUEST_TIMEOUT_MS,
+  },
 });

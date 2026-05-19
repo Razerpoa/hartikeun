@@ -1,33 +1,76 @@
 import fs from 'fs';
 import path from 'path';
+import { LRUCache } from 'lru-cache';
 import { config } from '../config.js';
 import { info, error as logError } from '../logger.js';
 
 const cachePath = path.join(process.cwd(), config.CACHE_PATH);
 
-export function loadCache(): Record<string, unknown> {
-  const wordCache: Record<string, unknown> = {};
+export type WordCacheValue = Record<string, unknown>;
+export type WordCache = LRUCache<string, WordCacheValue>;
+
+let persistTimer: ReturnType<typeof setInterval> | null = null;
+
+export function createCache(): WordCache {
+  const cache = new LRUCache<string, WordCacheValue>({
+    max: config.LRU_MAX,
+    ttl: config.LRU_TTL_MS,
+  });
+
   if (fs.existsSync(cachePath)) {
     try {
       const data = fs.readFileSync(cachePath, 'utf-8');
       if (data) {
         const parsed = JSON.parse(data);
         if (typeof parsed === 'object' && parsed !== null) {
-          Object.assign(wordCache, parsed);
+          for (const [key, value] of Object.entries(parsed)) {
+            cache.set(key, value as WordCacheValue);
+          }
         }
-        info(`Loaded ${Object.keys(wordCache).length} items from ${config.CACHE_PATH}`);
+        info(`Loaded ${cache.size} items from ${config.CACHE_PATH}`);
       }
     } catch (e) {
       logError('Error loading word cache:', e);
     }
   }
-  return wordCache;
+
+  return cache;
 }
 
-export function saveCache(wordCache: Record<string, unknown>): void {
+export function persistCache(cache: WordCache): void {
   try {
-    fs.writeFileSync(cachePath, JSON.stringify(wordCache, null, 2));
+    const obj: Record<string, WordCacheValue> = {};
+    for (const [key, value] of cache.entries()) {
+      obj[key] = value;
+    }
+    fs.writeFileSync(cachePath, JSON.stringify(obj, null, 2));
+    info(`Persisted ${cache.size} items to ${config.CACHE_PATH}`);
   } catch (e) {
     logError('Error saving word cache:', e);
   }
+}
+
+export function startCachePersistence(cache: WordCache): void {
+  if (persistTimer) return;
+  persistTimer = setInterval(() => persistCache(cache), 5 * 60 * 1000);
+  if (persistTimer && typeof persistTimer === 'object' && 'unref' in persistTimer) {
+    persistTimer.unref();
+  }
+}
+
+export function stopCachePersistence(): void {
+  if (persistTimer) {
+    clearInterval(persistTimer);
+    persistTimer = null;
+  }
+}
+
+// Legacy export for backward compatibility with existing signatures --
+// loadCache now creates and returns a cache, saveCache persists it.
+export function loadCache(): WordCache {
+  return createCache();
+}
+
+export function saveCache(cache: WordCache): void {
+  persistCache(cache);
 }
