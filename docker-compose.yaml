@@ -1,0 +1,42 @@
+services:
+  hartikeun:
+    build: .
+    container_name: hartikeun
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # Required — must be set in .env or shell env
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+
+      # Server
+      - PORT=3000
+      - NODE_ENV=production
+
+      # Optional overrides
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.1-flash-lite}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+
+      # Cache (defaults are fine for most users)
+      - LRU_MAX=${LRU_MAX:-1000}
+      - LRU_TTL_MS=${LRU_TTL_MS:-86400000}
+      - CACHE_PATH=${CACHE_PATH:-/data/word_cache.json}
+
+      # Rate limiting
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-60000}
+      - RATE_LIMIT_MAX=${RATE_LIMIT_MAX:-30}
+
+      # Request timeout
+      - REQUEST_TIMEOUT_MS=${REQUEST_TIMEOUT_MS:-30000}
+    volumes:
+      # Persist word cache across restarts
+      - cache_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  cache_data:

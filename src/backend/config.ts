@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 export const config = {
   PORT: parseInt(process.env.PORT || '3000', 10),
   GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',

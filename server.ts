@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
@@ -12,8 +11,6 @@ import {
   stopCachePersistence,
 } from './src/backend/services/cache.js';
 import { createApp } from './src/backend/app.js';
-
-dotenv.config();
 
 // Load custom dictionary once at startup
 let customDictText = '';

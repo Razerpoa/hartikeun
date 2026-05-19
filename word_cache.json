@@ -1,1 +1,30 @@
-{}
+{
+  "details:id:ctx:Ke sana (gabungan ka:kadituna": {
+    "word": "kadituna",
+    "pronunciation": "[ka-di-tu-na]",
+    "origin_and_culture": "Kata ini berasal dari bahasa Sunda yang merupakan penggabungan partikel 'ka' (ke), 'ditu' (sana), dan akhiran '-na' yang berfungsi sebagai penegas atau penunjuk arah yang lebih spesifik. Secara sosiolinguistik, kata ini sering digunakan dalam percakapan sehari-hari masyarakat Sunda untuk mengarahkan seseorang ke suatu tempat atau merujuk pada konsekuensi logis dari sebuah situasi (ke arah sana). Penggunaannya sangat lazim dalam komunikasi informal di wilayah Jawa Barat.",
+    "usage_examples": [
+      {
+        "sentence": "Ari hayang apal jalan, cing tanya ka bapak nu kadituna.",
+        "translation": "Kalau ingin tahu jalan, coba tanya ke bapak yang ada di sebelah sana.",
+        "context": "Menunjuk arah atau posisi orang.",
+        "dialect": "Sunda"
+      },
+      {
+        "sentence": "Geus teu perlu dipikiran deui, kadituna mah bakal anggeus sorangan.",
+        "translation": "Sudah tidak perlu dipikirkan lagi, ke depannya (konsekuensinya) pasti akan selesai sendiri.",
+        "context": "Merujuk pada masa depan atau kelanjutan sebuah urusan.",
+        "dialect": "Sunda"
+      }
+    ],
+    "synonyms": [
+      "ka ditu",
+      "ka belah ditu",
+      "ka arah ditu"
+    ],
+    "antonyms": [
+      "kamari",
+      "kadieu"
+    ]
+  }
+}
