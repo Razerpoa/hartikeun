@@ -6,10 +6,14 @@ import { GoogleGenAI, Type, Modality } from '@google/genai';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
+import { config } from './src/backend/config.js';
+import { info, warn, error as logError } from './src/backend/logger.js';
+import { errorHandler } from './src/backend/middleware/errorHandler.js';
+
 dotenv.config();
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: config.GEMINI_API_KEY,
   httpOptions: {
     headers: {
       'User-Agent': 'aistudio-build',
@@ -28,13 +32,13 @@ if (fs.existsSync(dictLoadPath)) {
       customDictText = `\nCustom Dictionary (Priority):\n${JSON.stringify(dict)}`;
     }
   } catch (e) {
-    console.error('Error parsing custom dictionary:', e);
+    logError('Error parsing custom dictionary:', e);
   }
 }
 
 // Graceful shutdown handlers
 const handleShutdown = (signal: string) => {
-  console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
+  info(`Received ${signal}. Shutting down gracefully...`);
   process.exit(0);
 };
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
@@ -42,8 +46,6 @@ process.on('SIGINT', () => handleShutdown('SIGINT'));
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
-  const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 
   function normalizeSlang(text: string): string {
     return text.split(/(\s+)/).map(w => {
@@ -83,21 +85,24 @@ async function startServer() {
     return `${prefix}:${lang}${extra ? ':' + extra : ''}:${canonical}`;
   }
 
-  app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+  app.use(cors({ origin: config.CORS_ORIGIN }));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-  const cachePath = path.join(process.cwd(), 'word_cache.json');
-  let wordCache: Record<string, any> = {};
+  const cachePath = path.join(process.cwd(), config.CACHE_PATH);
+  const wordCache: Record<string, unknown> = {};
   if (fs.existsSync(cachePath)) {
     try {
       const data = fs.readFileSync(cachePath, 'utf-8');
       if (data) {
-        wordCache = JSON.parse(data);
-        console.log(`[Cache] Loaded ${Object.keys(wordCache).length} items from word_cache.json`);
+        const parsed = JSON.parse(data);
+        if (typeof parsed === 'object' && parsed !== null) {
+          Object.assign(wordCache, parsed);
+        }
+        info(`Loaded ${Object.keys(wordCache).length} items from ${config.CACHE_PATH}`);
       }
     } catch (e) {
-      console.error('Error loading word cache:', e);
+      logError('Error loading word cache:', e);
     }
   }
 
@@ -105,7 +110,7 @@ async function startServer() {
     try {
       fs.writeFileSync(cachePath, JSON.stringify(wordCache, null, 2));
     } catch (e) {
-      console.error('Error saving word cache:', e);
+      logError('Error saving word cache:', e);
     }
   };
 
@@ -122,14 +127,14 @@ async function startServer() {
     // We don't cache image requests for now to avoid huge cache files
     const cacheKey = !image ? getCacheKey('transform', lang, normalizedText, tone.toString()) : null;
     if (cacheKey && wordCache[cacheKey]) {
-      console.log(`[Cache Hit] Transform: ${cacheKey}`);
+      info(`[Cache Hit] Transform: ${cacheKey}`);
       return res.json(wordCache[cacheKey]);
     }
 
     if (cacheKey) {
-      console.log(`[Cache Miss] Fetching transform: ${cacheKey}`);
+      info(`[Cache Miss] Fetching transform: ${cacheKey}`);
     } else {
-      console.log(`[Multi-modal] Fetching transform with image`);
+      info(`[Multi-modal] Fetching transform with image`);
     }
 
     const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
@@ -208,7 +213,7 @@ CRITICAL RULES:
     }
 
     try {
-      const contents: any[] = [{
+      const contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> }> = [{
         role: 'user',
         parts: [
           { text: `Input: "${normalizedText}"\n${toneInstruction}${customDictText}` }
@@ -229,7 +234,7 @@ CRITICAL RULES:
       }
 
       const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
+        model: config.GEMINI_MODEL,
         contents: contents,
         config: {
           systemInstruction: baseSystemPrompt,
@@ -311,14 +316,18 @@ CRITICAL RULES:
         }
       });
 
-      const result = JSON.parse(response.text);
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error('Empty response from AI model');
+      }
+      const result = JSON.parse(responseText);
       if (cacheKey) {
         wordCache[cacheKey] = result;
         saveCache();
       }
       res.json(result);
     } catch (error) {
-      console.error('Error transforming text:', error);
+      logError('Error transforming text:', error);
       res.status(500).json({ error: 'Failed to transform text' });
     }
   });
@@ -335,16 +344,16 @@ CRITICAL RULES:
     const cacheKey = getCacheKey('details', lang, normalizedWord, context ? `ctx:${context.substring(0, 20)}` : undefined);
     
     if (wordCache[cacheKey]) {
-      console.log(`[Cache Hit] Word details: ${cacheKey}`);
+      info(`[Cache Hit] Word details: ${cacheKey}`);
       return res.json(wordCache[cacheKey]);
     }
 
-    console.log(`[Cache Miss] Fetching word details: ${cacheKey} (Original: ${word})`);
+    info(`[Cache Miss] Fetching word details: ${cacheKey} (Original: ${word})`);
     const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
 
     try {
       const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
+        model: config.GEMINI_MODEL,
         contents: `Input Word: "${normalizedWord}"\nContext provided: "${context}"\nAll explanations must be in ${targetLangName}.`,
         config: {
           systemInstruction: `You are a professional etymologist and socio-linguist. Provide a linguistic deep dive for the provided word/slang.
@@ -393,12 +402,16 @@ CRITICAL RULES:
         },
       });
 
-      const result = JSON.parse(response.text);
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error('Empty response from AI model');
+      }
+      const result = JSON.parse(responseText);
       wordCache[cacheKey] = result;
       saveCache();
       res.json(result);
-    } catch (error) {
-      console.error('Error fetching word details:', error);
+    } catch (e) {
+      logError('Error fetching word details:', e);
       res.status(500).json({ error: 'Failed to fetch word details' });
     }
   });
@@ -418,7 +431,7 @@ CRITICAL RULES:
           responseModalities: [Modality.AUDIO],
           speechConfig: {
             voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: voice as any },
+              prebuiltVoiceConfig: { voiceName: voice },
             },
           },
         },
@@ -430,11 +443,14 @@ CRITICAL RULES:
       } else {
         res.status(500).json({ error: 'No audio generated' });
       }
-    } catch (error) {
-      console.error('Error generating speech:', error);
+    } catch (e) {
+      logError('Error generating speech:', e);
       res.status(500).json({ error: 'Failed to generate speech' });
     }
   });
+
+  // Global error handler (must be after all routes)
+  app.use(errorHandler);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
@@ -451,8 +467,8 @@ CRITICAL RULES:
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(config.PORT, '0.0.0.0', () => {
+    info(`Server running on http://localhost:${config.PORT}`);
   });
 }
 
