@@ -226,6 +226,8 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
                 if (subjectWordIndex !== -1 && i === subjectWordIndex) {
                   // 2. Render subject word AND next word together
                   const nextWord = displayHeroWords[i + 1];
+                  const nextIndex = i + 1;
+                  const nextWordStyleClass = `${nextIndex === underlinedIndex ? styles[1] : styles[nextIndex > underlinedIndex ? (nextIndex % styles.length) : (nextIndex % styles.length)]}`;
                   
                   return (
                     <span key={i} className="inline-block whitespace-nowrap">
@@ -269,7 +271,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
                         initial={hasAnimated ? false : { opacity: 0, y: 40, rotateX: -90, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
                         transition={{ duration: 0.8, delay: hasAnimated ? 0 : 0.4 + ((i + 1) * 0.1), ease: [0.16, 1, 0.3, 1] }}
-                        className={styleClass}
+                        className={nextWordStyleClass}
                       >
                         {nextWord}
                       </motion.span>
