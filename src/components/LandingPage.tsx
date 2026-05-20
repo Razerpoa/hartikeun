@@ -1,78 +1,16 @@
 import { FC, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { 
   ArrowRight, 
-  Globe, 
-  Zap, 
-  Sparkles, 
-  BookOpen
+  Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '../i18n';
 
 interface LandingPageProps {
   uiLang: 'id' | 'en';
   setUiLang: (lang: 'id' | 'en') => void;
 }
-
-const RollingHero: FC<{ uiLang: 'id' | 'en' }> = ({ uiLang }) => {
-  const terms = [
-    "Naon", "Opo", "Gercep", "Mabar", "Tara", 
-    "Sia", "Jalu", "Kumaha", "Dahar", "Sare", 
-    "Lur", "Bray", "Uy", "Jir", "Kuy", 
-    "Gokil", "Baper", "Mager", "Gabut", "Anjay", 
-    "Yoi", "Kepo", "Bokis", "Ceunah", "Sambat"
-  ];
-  
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % terms.length);
-    }, 2800);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="flex flex-col items-center w-full">
-      <motion.div 
-        layout
-        transition={{
-          layout: { type: "spring", stiffness: 200, damping: 25 }
-        }}
-        className="flex items-center justify-center gap-x-2 sm:gap-x-4 flex-wrap text-3xl sm:text-5xl lg:text-7xl font-serif text-white italic mb-6 leading-tight w-full max-w-5xl px-4"
-      >
-        <div className="relative flex items-center">
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span
-              key={index}
-              initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
-              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-              exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
-              transition={{ 
-                duration: 0.8, 
-                ease: [0.16, 1, 0.3, 1]
-              }}
-              className="text-brand-amber whitespace-nowrap inline-block"
-            >
-              {terms[index]}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-        <motion.span 
-          layout
-          transition={{
-            type: "spring",
-            stiffness: 200,
-            damping: 25
-          }}
-          className="shrink-0"
-        >
-          {uiLang === 'id' ? ', artinya apa?' : ', what does it mean?'}
-        </motion.span>
-      </motion.div>
-    </div>
-  );
-};
 
 export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
   const navigate = useNavigate();
@@ -84,24 +22,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const content = {
-    id: {
-      hero: "Ga ngerti temen kamu ngomong apa",
-      subHero: "Jangan cuma melongo, ayo cari tau hartina!",
-      featureSubtitle: "Paste screenshot chat, paste pesan temanmu, atau cari arti dialek daerah—semuanya dalam satu platform.",
-      description: "Hartikeun // ID - Jembatan budaya multi-dialek yang bikin kamu nggak bakal bingung lagi denger bahasa gaul atau bahasa daerah temen-temen kamu.",
-      cta: "Ayo Cari Artinya"
-    },
-    en: {
-      hero: "Got Confused by friends' slang",
-      subHero: "Don't just nod along, find out what it means!",
-      featureSubtitle: "Paste chat screenshots, type slang text, or explore regional dialects—all in one cultural bridge.",
-      description: "Hartikeun // ID - A multi-dialect cultural translator that ensures you'll never be lost in translation when your friends use regional slang or local dialects.",
-      cta: "Find out what it means"
-    }
-  };
-
-  const t = content[uiLang];
+  const t = useI18n(uiLang).landing;
   const heroWords = t.hero.split(" ");
   const targetIndex = heroWords.length - 1;
 

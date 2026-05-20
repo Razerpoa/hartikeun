@@ -2,10 +2,10 @@ import path from 'path';
 import fs from 'fs';
 
 import { config } from './src/backend/config.js';
-import { info, warn, error as logError } from './src/backend/logger.js';
+import { info, error as logError } from './src/backend/logger.js';
 import { ai } from './src/backend/services/gemini.js';
 import {
-  loadCache,
+  createCache,
   persistCache,
   startCachePersistence,
   stopCachePersistence,
@@ -13,6 +13,7 @@ import {
 import { createApp } from './src/backend/app.js';
 
 // Load custom dictionary once at startup
+// ... (lines 16-29)
 let customDictText = '';
 const dictLoadPath = path.join(process.cwd(), 'custom_dictionary.json');
 if (fs.existsSync(dictLoadPath)) {
@@ -23,12 +24,12 @@ if (fs.existsSync(dictLoadPath)) {
       customDictText = `\nCustom Dictionary (Priority):\n${JSON.stringify(dict)}`;
     }
   } catch (e) {
-    logError('Error parsing custom dictionary:', e);
+    logError('Error parsing custom dictionary:', undefined, e);
   }
 }
 
 // Load word cache at startup
-const wordCache = loadCache();
+const wordCache = createCache();
 
 // Periodic persistence every 5 minutes
 startCachePersistence(wordCache);

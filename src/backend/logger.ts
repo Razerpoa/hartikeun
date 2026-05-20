@@ -2,17 +2,20 @@ function timestamp(): string {
   return new Date().toISOString().replace('T', ' ').replace('Z', '');
 }
 
-export function info(message: string, ...args: unknown[]): void {
+function formatMessage(level: string, message: string, requestId?: string, ...args: unknown[]): string {
+  const idPart = requestId ? ` [${requestId}]` : '';
   const extra = args.length > 0 ? ' ' + args.map(a => String(a)).join(' ') : '';
-  console.log(`[${timestamp()}] INFO: ${message}${extra}`);
+  return `[${timestamp()}] ${level}:${idPart} ${message}${extra}`;
 }
 
-export function warn(message: string, ...args: unknown[]): void {
-  const extra = args.length > 0 ? ' ' + args.map(a => String(a)).join(' ') : '';
-  console.warn(`[${timestamp()}] WARN: ${message}${extra}`);
+export function info(message: string, requestId?: string, ...args: unknown[]): void {
+  console.log(formatMessage('INFO', message, requestId, ...args));
 }
 
-export function error(message: string, ...args: unknown[]): void {
-  const extra = args.length > 0 ? ' ' + args.map(a => String(a)).join(' ') : '';
-  console.error(`[${timestamp()}] ERROR: ${message}${extra}`);
+export function warn(message: string, requestId?: string, ...args: unknown[]): void {
+  console.warn(formatMessage('WARN', message, requestId, ...args));
+}
+
+export function error(message: string, requestId?: string, ...args: unknown[]): void {
+  console.error(formatMessage('ERROR', message, requestId, ...args));
 }

@@ -17,21 +17,27 @@ docker compose up # build + run with .env
 
 ```
 server.ts                 # entry: load dict/cache, start server
-src/backend/
-├── config.ts             # env config (dotenv loads .env at module eval time)
-├── app.ts                # Express app factory (CORS, rate-limit, routes, Vite)
-├── utils.ts              # normalizeSlang(), getCacheKey()
-├── logger.ts             # [timestamp] LEVEL: message
-├── services/
-│   ├── gemini.ts         # GoogleGenAI singleton (created at import time)
-│   └── cache.ts          # LRU cache (max 1000, TTL 24h), persists every 5min
-├── middleware/
-│   └── errorHandler.ts   # AppError class + { error: string } response shape
-└── routes/
-    ├── transform.ts      # POST /api/transform
-    ├── wordDetails.ts    # POST /api/word-details
-    └── tts.ts            # POST /api/tts
-src/components/           # React: LandingPage, Translator, WordDetails
+src/
+├── i18n.ts               # Shared typed translations & useI18n hook
+├── vitest.setup.tsx      # Test setup & mocks
+├── backend/
+│   ├── config.ts         # env config (dotenv loads .env at module eval time)
+│   ├── app.ts            # Express app factory (CORS, rate-limit, routes, Vite)
+│   ├── utils.ts          # normalizeSlang(), getCacheKey()
+│   ├── logger.ts         # [timestamp] LEVEL: [requestId] message
+│   ├── validation.ts     # Zod schemas for API routes
+│   ├── services/
+│   │   ├── gemini.ts     # GoogleGenAI singleton (created at import time)
+│   │   └── cache.ts      # LRU cache (max 1000, TTL 24h), persists every 5min
+│   ├── middleware/
+│   │   ├── errorHandler.ts # AppError class + { error: string } response shape
+│   │   └── requestId.ts    # Generates 8-char request IDs
+│   └── routes/
+│       ├── transform.ts    # POST /api/transform
+│       ├── wordDetails.ts  # POST /api/word-details
+│       └── tts.ts          # POST /api/tts
+└── components/             # React: LandingPage, Translator, WordDetails
+    └── ui/                 # Extracted UI components (WordToken, CopyButton, etc.)
 ```
 
 ## Critical quirks
@@ -64,9 +70,9 @@ Three Gemini routes sit behind `express-rate-limit` at 30 req/min per IP:
 - `custom_dictionary.json` is loaded once at startup (not per-request).
 
 ### Testing
-- Vitest, `node` environment, test files: `src/backend/**/*.test.ts`
+- Vitest, `jsdom` environment, test files: `src/**/*.test.{ts,tsx}`
 - `@google/genai` is mocked via `vi.mock('@google/genai')` — no real API key needed
-- 29 tests total (16 unit + 13 integration)
+- 39 tests total (16 unit + 13 integration + 10 frontend/validation)
 
 ### Docker
 Multi-stage: build with `npm ci` + `npm run build`, runtime with `npm ci --production` + copied `dist/`. HEALTHCHECK uses `wget http://127.0.0.1:3000/api/health` (explicit IPv4 — Alpine's BusyBox wget resolves `localhost` to IPv6). The word cache volume is mounted at `/data`.

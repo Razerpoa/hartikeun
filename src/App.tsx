@@ -9,7 +9,7 @@ export default function App() {
   const [uiLang, setUiLang] = useState<'id' | 'en'>('id');
   const [input, setInput] = useState('');
   const [result, setResult] = useState<TransformationResult | null>(null);
-  const [toneLevel, setToneLevel] = useState(50);
+  const [toneLevel] = useState(50);
 
   return (
     <Router>
@@ -26,7 +26,6 @@ export default function App() {
               result={result}
               setResult={setResult}
               toneLevel={toneLevel}
-              setToneLevel={setToneLevel}
             />
           } 
         />

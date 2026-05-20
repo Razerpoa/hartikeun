@@ -1,239 +1,20 @@
-import { useState, useRef, ChangeEvent, FC, useEffect, ClipboardEvent } from 'react';
+import { useState, useRef, ChangeEvent, FC, ClipboardEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Languages, 
   Sparkles, 
   AlertCircle, 
   Check, 
-  Copy,
   Zap,
   Loader2,
-  ArrowRight,
   Image as ImageIcon,
-  Camera,
-  X,
-  FileImage
+  X
 } from 'lucide-react';
 import { TransformationResult } from '../types.ts';
 import { useNavigate } from 'react-router-dom';
-
-const CopyButton = ({ text, label }: { text: string; label: string }) => {
-// ... existing CopyButton ...
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <button 
-      onClick={handleCopy}
-      className={`text-[10px] uppercase px-4 py-1.5 rounded transition-all border flex items-center gap-2 ${
-        copied 
-          ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' 
-          : 'bg-white/5 border-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
-      }`}
-    >
-      {copied ? <Check size={12} /> : <Copy size={12} />}
-      {copied ? 'Copied' : label}
-    </button>
-  );
-};
-
-const WordToken: FC<{ 
-  word: string; 
-  context?: string; 
-  label: string; 
-  isProperName?: boolean;
-  variant?: 'default' | 'inverted';
-}> = ({ word, context, label, isProperName, variant = 'default' }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const tokenRef = useRef<HTMLSpanElement>(null);
-  const [alignment, setAlignment] = useState<'left' | 'center' | 'right'>('center');
-  const navigate = useNavigate();
-  
-  const isDefault = variant === 'default';
-
-  if (!context || isProperName) {
-    return <span className={`inline-block px-0.5 ${isDefault ? 'text-slate-400' : 'text-black/60'}`}>{word}</span>;
-  }
-
-  const handleMouseEnter = () => {
-    if (tokenRef.current) {
-      const rect = tokenRef.current.getBoundingClientRect();
-      const screenWidth = window.innerWidth;
-      
-      if (rect.left < 150) {
-        setAlignment('left');
-      } else if (screenWidth - rect.right < 150) {
-        setAlignment('right');
-      } else {
-        setAlignment('center');
-      }
-    }
-    setIsHovered(true);
-  };
-
-  const alignmentClasses = {
-    left: 'left-0 translate-x-0',
-    center: 'left-1/2 -translate-x-1/2',
-    right: 'right-0 translate-x-0'
-  };
-
-  const arrowClasses = {
-    left: 'left-4 translate-x-0',
-    center: 'left-1/2 -translate-x-1/2',
-    right: 'right-4 translate-x-0'
-  };
-
-  return (
-    <span 
-      ref={tokenRef}
-      className="relative inline-block cursor-help px-0.5 group"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <span className={`
-        ${isDefault 
-          ? 'text-brand-amber border-b border-brand-amber/30 group-hover:bg-brand-amber/10' 
-          : 'text-black font-bold border-b border-black/30 group-hover:bg-black/10'} 
-        transition-colors
-      `}>
-        {word}
-      </span>
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`absolute bottom-full mb-3 w-[80vw] sm:w-64 p-4 bg-[#111112] border border-brand-amber/40 rounded-xl shadow-2xl z-50 pointer-events-auto ${alignmentClasses[alignment]}`}
-          >
-            <div className={`absolute bottom-[-6px] w-3 h-3 bg-[#111112] border-b border-r border-brand-amber/40 rotate-45 ${arrowClasses[alignment]}`} />
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
-              <div className="text-[9px] uppercase font-bold text-brand-amber font-mono tracking-widest">
-                {label}
-              </div>
-            </div>
-            <p className="text-xs text-slate-200 leading-relaxed font-sans font-normal italic mb-3">
-              {context}
-            </p>
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").toLowerCase();
-                const params = new URLSearchParams();
-                if (context) params.set('context', context);
-                navigate(`/word/${cleanWord}${params.toString() ? '?' + params.toString() : ''}`);
-              }}
-              className="w-full flex items-center justify-between px-3 py-2 bg-brand-amber/10 border border-brand-amber/20 hover:bg-brand-amber hover:text-black transition-all group/btn"
-            >
-              <span className="text-[9px] uppercase font-bold tracking-widest">Deep Dive</span>
-              <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </span>
-  );
-};
-
-const ChatMessageBubble: FC<{ 
-  message: any; 
-  uiLang: 'id' | 'en';
-  tokenContextLabel: string;
-}> = ({ message, uiLang, tokenContextLabel }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className={`flex flex-col mb-4 w-full ${message.sender_type === 'self' ? 'items-end' : 'items-start'}`}>
-      <div 
-        onClick={() => setExpanded(!expanded)}
-        className={`max-w-[85%] p-4 rounded-3xl cursor-pointer transition-all shadow-xl group/bubble ${
-          message.sender_type === 'self' 
-            ? 'bg-brand-amber text-black rounded-tr-none' 
-            : 'bg-surface-elevated border border-white/10 text-slate-200 rounded-tl-none'
-        } ${expanded ? 'scale-[1.02] ring-2 ring-brand-amber/30' : 'hover:scale-[1.01]'}`}
-      >
-        <div className="flex items-center gap-2 mb-2 opacity-40 group-hover/bubble:opacity-100 transition-opacity">
-          <div className={`w-1.5 h-1.5 rounded-full ${message.sender_type === 'self' ? 'bg-black' : 'bg-brand-amber'}`} />
-          <span className={`text-[8px] uppercase font-black tracking-widest ${message.sender_type === 'self' ? 'text-black' : 'text-slate-500'}`}>
-            {message.sender_type === 'self' ? 'You' : 'Friend'}
-          </span>
-        </div>
-        <div className="text-sm leading-relaxed whitespace-pre-wrap font-medium">
-          {message.original_text.split(/(\s+)/).map((part: string, i: number) => {
-            if (/\s+/.test(part)) return part;
-            const word = part;
-            const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").toLowerCase();
-            const match = message.vocabulary_breakdown.find((v: any) => 
-              v.original_word.toLowerCase() === cleanWord || 
-              word.toLowerCase().includes(v.original_word.toLowerCase())
-            );
-            return (
-              <WordToken 
-                key={i} 
-                word={word} 
-                context={match?.meaning_and_context} 
-                label={tokenContextLabel}
-                isProperName={match?.is_proper_name}
-                variant={message.sender_type === 'self' ? 'inverted' : 'default'}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            className={`mt-2 w-full max-w-[90%] z-20 ${message.sender_type === 'self' ? 'flex justify-end' : 'flex justify-start'}`}
-          >
-            <div className="p-4 bg-[#141416] border border-white/5 rounded-2xl space-y-4 shadow-2xl w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                  <h4 className={`text-[8px] uppercase font-black text-slate-500 tracking-widest mb-2 flex items-center gap-2`}>
-                    <div className="w-1 h-1 bg-emerald-500 rounded-full" />
-                    Formal Translation
-                  </h4>
-                  <p className="text-xs text-white italic leading-relaxed">{message.translations.formal_indonesian}</p>
-                </div>
-                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                  <h4 className="text-[8px] uppercase font-black text-slate-500 tracking-widest mb-2 flex items-center gap-2">
-                    <div className="w-1 h-1 bg-blue-500 rounded-full" />
-                    Clear English
-                  </h4>
-                  <p className="text-xs text-white italic leading-relaxed">{message.translations.professional_english}</p>
-                </div>
-              </div>
-
-              {message.vocabulary_breakdown.filter((v: any) => !v.is_proper_name).length > 0 && (
-                <div className="pt-2 border-t border-white/5">
-                  <h4 className="text-[8px] uppercase font-black text-brand-amber/60 tracking-widest mb-3">Vocabulary Breakdown</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {message.vocabulary_breakdown.filter((v: any) => !v.is_proper_name).map((v: any, idx: number) => (
-                      <div key={idx} className="px-3 py-1.5 bg-brand-amber/10 border border-brand-amber/20 rounded-lg text-[10px] text-brand-amber flex items-center gap-2">
-                        <span className="font-bold underline decoration-brand-amber/30">{v.original_word}</span>
-                        <ArrowRight size={8} />
-                        <span className="italic opacity-80">{v.meaning_and_context}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+import { useI18n } from '../i18n';
+import { WordToken } from './ui/WordToken';
+import { CopyButton } from './ui/CopyButton';
+import { ChatMessageBubble } from './ui/ChatMessageBubble';
 
 export const Translator: FC<{
   uiLang: 'id' | 'en'; 
@@ -243,7 +24,6 @@ export const Translator: FC<{
   result: TransformationResult | null;
   setResult: (res: TransformationResult | null) => void;
   toneLevel: number;
-  setToneLevel: (level: number) => void;
 }> = ({ 
   uiLang, 
   setUiLang,
@@ -251,8 +31,7 @@ export const Translator: FC<{
   setInput,
   result,
   setResult,
-  toneLevel,
-  setToneLevel
+  toneLevel
 }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -331,68 +110,8 @@ export const Translator: FC<{
     }
   };
 
-  const ui = {
-    en: {
-      tagline: "Native Tongue? // No Problem!",
-      sidebar1: "Daily Bridge",
-      // sidebar2: "Cultural Insight",
-      inputLabel: "Your Local Input",
-      inputTitle: "What's the Meaning?",
-      inputPlaceholder: "Enter slang, local greetings, or dialect here...",
-      charCount: "characters",
-      transformBtn: "Translate Meaning",
-      processing: "Analyzing Dialect...",
-      politeLabel: "Balanced & Polite",
-      assertiveLabel: "Precise & Clear",
-      casualLabel: "Casual & Friendly",
-      dailyLabel: "Everyday Indonesian",
-      awaiting: "Awaiting Your Input",
-      awaitingDesc: "Type in any regional slang or dialect to see its universal translation and cultural meaning.",
-      contextLabel: "Situation",
-      toneLabelOutput: "Vibe",
-      copy: "Copy",
-      tryExample: "Try this:",
-      riskTitle: "Word Meanings",
-      footerEngine: "Hartikeun v5.1.0",
-      footerPrivacy: "Privacy",
-      footerEnterprise: "Developers",
-      tokenContextLabel: "Context & Meaning",
-      imageBtn: "Add Image",
-      imageDesc: "Upload or take a screenshot",
-      removeBtn: "Remove"
-    },
-    id: {
-      tagline: "Bahasa Daerah? // Bukan lagi masalah!",
-      sidebar1: "Terjemahkan",
-      // sidebar2: "Wawasan Budaya",
-      inputLabel: "Masukin Bahasa Lokal Kamu",
-      inputTitle: "Translate ke bahasa biasa",
-      inputPlaceholder: "Kalimat bahasa daerah atau paste screenshot...",
-      charCount: "karakter",
-      transformBtn: "Artinya",
-      processing: "Menganalisis Dialek...",
-      politeLabel: "Seimbang & Sopan",
-      assertiveLabel: "Tepat & Jelas",
-      casualLabel: "Santai & Akrab",
-      dailyLabel: "Bahasa Sehari-hari",
-      awaiting: "Nungguin input kamu",
-      awaitingDesc: "Ketik slang atau dialek daerah untuk melihat terjemahan universal dan makna setiap katanya.",
-      contextLabel: "Situasi",
-      toneLabelOutput: "Vibe",
-      copy: "Salin",
-      tryExample: "Coba ini:",
-      riskTitle: "Makna Kata",
-      footerEngine: "Hartikeun v5.1.0",
-      footerPrivacy: "Privasi",
-      footerEnterprise: "Pengembang",
-      tokenContextLabel: "Konteks & Makna",
-      imageBtn: "Tambah Gambar",
-      imageDesc: "Unggah atau ambil tangkapan layar",
-      removeBtn: "Hapus"
-    }
-  };
-
-  const currentUi = ui[uiLang];
+  const currentUi = useI18n(uiLang).translator;
+  const commonUi = useI18n(uiLang).common;
   const isActive = !!(loading || result);
 
   return (
@@ -491,8 +210,8 @@ export const Translator: FC<{
               >
                 <ImageIcon size={18} className="text-brand-amber" />
                 <div className="text-left">
-                  <div className="text-[10px] font-bold uppercase tracking-widest">{(currentUi as any).imageBtn}</div>
-                  <div className="text-[8px] text-slate-500">{(currentUi as any).imageDesc}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest">{currentUi.imageBtn}</div>
+                  <div className="text-[8px] text-slate-500">{currentUi.imageDesc}</div>
                 </div>
               </button>
             </div>
@@ -551,7 +270,7 @@ export const Translator: FC<{
 
                     <div className="flex gap-4 mb-6 border-b border-white/5 pb-4">
                       <div className="flex-1">
-                        <span className="text-[9px] uppercase font-bold text-slate-500 block mb-1">{(currentUi as any).contextLabel}</span>
+                        <span className="text-[9px] uppercase font-bold text-slate-500 block mb-1">{currentUi.contextLabel}</span>
                         <p className="text-xs text-white italic">"{result.analysis.context}"</p>
                       </div>
                     </div>
@@ -735,7 +454,6 @@ export const Translator: FC<{
                               <ChatMessageBubble 
                                 key={i} 
                                 message={msg} 
-                                uiLang={uiLang} 
                                 tokenContextLabel={currentUi.tokenContextLabel} 
                               />
                             ))}
@@ -750,7 +468,7 @@ export const Translator: FC<{
                           <div className="p-6 sm:p-8 border-b border-white/5 relative group bg-surface-base">
                             <div className="flex justify-between items-center mb-6 gap-4">
                               <h3 className="text-[10px] sm:text-xs text-white uppercase tracking-[0.2em] font-semibold border-l-2 border-blue-400 pl-3">Formal Indonesian (Baku)</h3>
-                              <CopyButton text={result.translations.formal_indonesian} label={currentUi.copy} />
+                              <CopyButton text={result.translations.formal_indonesian} label={commonUi.copy} />
                             </div>
                             <p className="text-xl sm:text-2xl font-serif text-slate-100 leading-normal italic whitespace-pre-wrap">
                               "{result.translations.formal_indonesian}"
@@ -760,7 +478,7 @@ export const Translator: FC<{
                           <div className="p-6 sm:p-8 border-b border-white/5 relative group bg-surface-subtle/30">
                             <div className="flex justify-between items-center mb-6 gap-4">
                               <h3 className="text-[10px] sm:text-xs text-white uppercase tracking-[0.2em] font-semibold border-l-2 border-amber-400 pl-3">{currentUi.dailyLabel}</h3>
-                              <CopyButton text={result.translations.daily_indonesian} label={currentUi.copy} />
+                              <CopyButton text={result.translations.daily_indonesian} label={commonUi.copy} />
                             </div>
                             <p className="text-xl sm:text-2xl font-serif text-slate-100 leading-normal italic whitespace-pre-wrap">
                               "{result.translations.daily_indonesian}"
@@ -770,7 +488,7 @@ export const Translator: FC<{
                           <div className="p-6 sm:p-8 bg-surface-subtle group border-b border-white/5">
                             <div className="flex justify-between items-center mb-6 gap-4">
                               <h3 className="text-[10px] sm:text-xs text-white uppercase tracking-[0.2em] font-semibold border-l-2 border-emerald-400 pl-3">Clear English</h3>
-                              <CopyButton text={result.translations.professional_english} label={currentUi.copy} />
+                              <CopyButton text={result.translations.professional_english} label={commonUi.copy} />
                             </div>
                             <p className="text-xl sm:text-2xl font-serif text-slate-100 leading-normal italic whitespace-pre-wrap">
                               "{result.translations.professional_english}"

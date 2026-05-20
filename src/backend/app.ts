@@ -6,6 +6,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requestIdMiddleware } from './middleware/requestId.js';
 import { registerTransformRoute } from './routes/transform.js';
 import { registerWordDetailsRoute } from './routes/wordDetails.js';
 import { registerTtsRoute } from './routes/tts.js';
@@ -21,6 +22,7 @@ export interface AppDeps {
 export async function createApp(deps: AppDeps): Promise<Express> {
   const app = express();
 
+  app.use(requestIdMiddleware);
   app.use(cors({ origin: config.CORS_ORIGIN }));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -61,7 +63,7 @@ export async function createApp(deps: AppDeps): Promise<Express> {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

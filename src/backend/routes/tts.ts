@@ -2,29 +2,20 @@ import type { Express } from 'express';
 import { Modality } from '@google/genai';
 import { error as logError } from '../logger.js';
 import type { GoogleGenAI } from '@google/genai';
+import { ttsSchema } from '../validation.js';
+import { ZodError } from 'zod';
 
 interface RouteDeps {
   ai: GoogleGenAI;
 }
 
-// Gemini TTS voice whitelist
-const ALLOWED_VOICES = new Set(['Kore', 'Leda', 'Aoede', 'Puck', 'Charon', 'Fenrir', 'Arctos']);
-
 export function registerTtsRoute(app: Express, deps: RouteDeps): void {
   const { ai } = deps;
 
   app.post('/api/tts', async (req, res) => {
-    const { text, voice = 'Kore' } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
-    }
-
-    if (!ALLOWED_VOICES.has(voice)) {
-      return res.status(400).json({ error: `Voice must be one of: ${[...ALLOWED_VOICES].join(', ')}` });
-    }
-
     try {
+      const { text, voice } = ttsSchema.parse(req.body);
+
       const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-tts-preview',
         contents: [{ parts: [{ text }] }],
@@ -44,8 +35,28 @@ export function registerTtsRoute(app: Express, deps: RouteDeps): void {
       } else {
         res.status(500).json({ error: 'No audio generated' });
       }
-    } catch (e) {
-      logError('Error generating speech:', e);
+    } catch (e: any) {
+      if (e instanceof ZodError) {
+        return res.status(400).json({ 
+          error: 'validation_failed', 
+          details: e.issues.map(err => ({ path: err.path, message: err.message })) 
+        });
+      }
+      
+      logError('Error generating speech:', req.requestId, e);
+
+      // Map Gemini errors
+      const status = e.status || e.statusCode;
+      if (status === 429) {
+        return res.status(429).json({ error: 'Too many requests to AI service. Please try again later.' });
+      }
+      if (status === 400) {
+        return res.status(400).json({ error: 'Invalid request to AI service.' });
+      }
+      if (status === 401 || status === 403) {
+        return res.status(500).json({ error: 'AI service configuration error.' });
+      }
+
       res.status(500).json({ error: 'Failed to generate speech' });
     }
   });

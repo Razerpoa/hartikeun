@@ -5,6 +5,8 @@ import { info, error as logError } from '../logger.js';
 import { normalizeSlang, getCacheKey } from '../utils.js';
 import type { GoogleGenAI } from '@google/genai';
 import type { WordCache } from '../services/cache.js';
+import { wordDetailsSchema } from '../validation.js';
+import { ZodError } from 'zod';
 
 interface RouteDeps {
   ai: GoogleGenAI;
@@ -15,26 +17,22 @@ export function registerWordDetailsRoute(app: Express, deps: RouteDeps): void {
   const { ai, wordCache } = deps;
 
   app.post('/api/word-details', async (req, res) => {
-    const { word, lang = 'id', context = '' } = req.body;
-
-    if (!word) {
-      return res.status(400).json({ error: 'Word is required' });
-    }
-
-    const normalizedWord = normalizeSlang(word);
-    // Include context in cache key to allow context-specific deep dives if the AI adjusts focus
-    const cacheKey = getCacheKey('details', lang, normalizedWord, context ? `ctx:${context.substring(0, 20)}` : undefined);
-
-    const cached = wordCache.get(cacheKey);
-    if (cached) {
-      info(`[Cache Hit] Word details: ${cacheKey}`);
-      return res.json(cached);
-    }
-
-    info(`[Cache Miss] Fetching word details: ${cacheKey} (Original: ${word})`);
-    const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
-
     try {
+      const { word, lang, context } = wordDetailsSchema.parse(req.body);
+
+      const normalizedWord = normalizeSlang(word);
+      // Include context in cache key to allow context-specific deep dives if the AI adjusts focus
+      const cacheKey = getCacheKey('details', lang, normalizedWord, context ? `ctx:${context.substring(0, 20)}` : undefined);
+
+      const cached = wordCache.get(cacheKey);
+      if (cached) {
+        info(`[Cache Hit] Word details: ${cacheKey}`, req.requestId);
+        return res.json(cached);
+      }
+
+      info(`[Cache Miss] Fetching word details: ${cacheKey} (Original: ${word})`, req.requestId);
+      const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
+
       const response = await ai.models.generateContent({
         model: config.GEMINI_MODEL,
         contents: `Input Word: "${normalizedWord}"\nContext provided: "${context}"\nAll explanations must be in ${targetLangName}.`,
@@ -92,8 +90,28 @@ export function registerWordDetailsRoute(app: Express, deps: RouteDeps): void {
       const result = JSON.parse(responseText);
       wordCache.set(cacheKey, result);
       res.json(result);
-    } catch (e) {
-      logError('Error fetching word details:', e);
+    } catch (e: any) {
+      if (e instanceof ZodError) {
+        return res.status(400).json({ 
+          error: 'validation_failed', 
+          details: e.issues.map(err => ({ path: err.path, message: err.message })) 
+        });
+      }
+      
+      logError('Error fetching word details:', req.requestId, e);
+
+      // Map Gemini errors
+      const status = e.status || e.statusCode;
+      if (status === 429) {
+        return res.status(429).json({ error: 'Too many requests to AI service. Please try again later.' });
+      }
+      if (status === 400) {
+        return res.status(400).json({ error: 'Invalid request to AI service.' });
+      }
+      if (status === 401 || status === 403) {
+        return res.status(500).json({ error: 'AI service configuration error.' });
+      }
+
       res.status(500).json({ error: 'Failed to fetch word details' });
     }
   });

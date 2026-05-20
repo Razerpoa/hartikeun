@@ -5,6 +5,8 @@ import { info, error as logError } from '../logger.js';
 import { normalizeSlang, getCacheKey } from '../utils.js';
 import type { GoogleGenAI } from '@google/genai';
 import type { WordCache } from '../services/cache.js';
+import { transformSchema } from '../validation.js';
+import { ZodError } from 'zod';
 
 interface RouteDeps {
   ai: GoogleGenAI;
@@ -12,53 +14,44 @@ interface RouteDeps {
   customDictText: string;
 }
 
-const MAX_TEXT_LENGTH = 5000;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 export function registerTransformRoute(app: Express, deps: RouteDeps): void {
   const { ai, wordCache, customDictText } = deps;
 
   app.post('/api/transform', async (req, res) => {
-    const { text, tone = 50, lang = 'id', image } = req.body;
+    try {
+      const { text, tone, lang, image } = transformSchema.parse(req.body);
 
-    if (!text && !image) {
-      return res.status(400).json({ error: 'Text or image is required' });
-    }
-
-    // Input validation
-    if (text && typeof text === 'string' && text.length > MAX_TEXT_LENGTH) {
-      return res.status(400).json({ error: `Text must be at most ${MAX_TEXT_LENGTH} characters` });
-    }
-
-    if (image && typeof image === 'string') {
-      const base64Data = image.split(',')[1] || image;
-      const decodedLength = Buffer.byteLength(base64Data, 'base64');
-      if (decodedLength > MAX_IMAGE_SIZE_BYTES) {
-        return res.status(400).json({ error: 'Image must be at most 5MB after decoding' });
+      if (image && typeof image === 'string') {
+        const base64Data = image.split(',')[1] || image;
+        const decodedLength = Buffer.byteLength(base64Data, 'base64');
+        if (decodedLength > MAX_IMAGE_SIZE_BYTES) {
+          return res.status(400).json({ error: 'Image must be at most 5MB after decoding' });
+        }
       }
-    }
 
-    const normalizedText = text ? normalizeSlang(text) : '(No text provided, see image)';
+      const normalizedText = text ? normalizeSlang(text) : '(No text provided, see image)';
 
-    // We don't cache image requests for now to avoid huge cache files
-    const cacheKey = !image ? getCacheKey('transform', lang, normalizedText, tone.toString()) : null;
-    if (cacheKey) {
-      const cached = wordCache.get(cacheKey);
-      if (cached) {
-        info(`[Cache Hit] Transform: ${cacheKey}`);
-        return res.json(cached);
+      // We don't cache image requests for now to avoid huge cache files
+      const cacheKey = !image ? getCacheKey('transform', lang, normalizedText, tone.toString()) : null;
+      if (cacheKey) {
+        const cached = wordCache.get(cacheKey);
+        if (cached) {
+          info(`[Cache Hit] Transform: ${cacheKey}`, req.requestId);
+          return res.json(cached);
+        }
       }
-    }
 
-    if (cacheKey) {
-      info(`[Cache Miss] Fetching transform: ${cacheKey}`);
-    } else {
-      info(`[Multi-modal] Fetching transform with image`);
-    }
+      if (cacheKey) {
+        info(`[Cache Miss] Fetching transform: ${cacheKey}`, req.requestId);
+      } else {
+        info(`[Multi-modal] Fetching transform with image`, req.requestId);
+      }
 
-    const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
+      const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
 
-    const baseSystemPrompt = `You are an expert Indonesian linguist and cultural bridge.
+      const baseSystemPrompt = `You are an expert Indonesian linguist and cultural bridge.
 Decode casual regional dialects (Sundanese, Javanese, Betawi, etc.), slang, or text from images into standard forms.
 
 CHAT DETECTION & EXTRACTION:
@@ -120,18 +113,17 @@ CRITICAL RULES:
 3. If an image is provided, analyze it first. If it's a chat, extract EVERYTHING.
 4. All analysis fields must be in ${targetLangName}.`;
 
-    let toneInstruction = '';
-    const level = Number(tone);
+      let toneInstruction = '';
+      const level = Number(tone);
 
-    if (level <= 33) {
-      toneInstruction = 'Tone: Casual/Friendly/Warm.';
-    } else if (level <= 66) {
-      toneInstruction = 'Tone: Balanced/Polite/Respectful.';
-    } else {
-      toneInstruction = 'Tone: Precise/Informative/Literal.';
-    }
+      if (level <= 33) {
+        toneInstruction = 'Tone: Casual/Friendly/Warm.';
+      } else if (level <= 66) {
+        toneInstruction = 'Tone: Balanced/Polite/Respectful.';
+      } else {
+        toneInstruction = 'Tone: Precise/Informative/Literal.';
+      }
 
-    try {
       const contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { data: string; mimeType: string } }> }> = [{
         role: 'user',
         parts: [
@@ -244,8 +236,28 @@ CRITICAL RULES:
         wordCache.set(cacheKey, result);
       }
       res.json(result);
-    } catch (error) {
-      logError('Error transforming text:', error);
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          error: 'validation_failed', 
+          details: error.issues.map(e => ({ path: e.path, message: e.message })) 
+        });
+      }
+      
+      logError('Error transforming text:', req.requestId, error);
+
+      // Map Gemini errors
+      const status = error.status || error.statusCode;
+      if (status === 429) {
+        return res.status(429).json({ error: 'Too many requests to AI service. Please try again later.' });
+      }
+      if (status === 400) {
+        return res.status(400).json({ error: 'Invalid request to AI service.' });
+      }
+      if (status === 401 || status === 403) {
+        return res.status(500).json({ error: 'AI service configuration error.' });
+      }
+
       res.status(500).json({ error: 'Failed to transform text' });
     }
   });

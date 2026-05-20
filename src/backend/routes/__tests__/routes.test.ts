@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 
 // Hoisted mocks: these run before any module code
@@ -101,7 +101,7 @@ describe('API Routes', () => {
         .send({});
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Text or image is required');
+      expect(res.body).toHaveProperty('error', 'validation_failed');
     });
 
     it('returns 400 when text exceeds 5000 characters', async () => {
@@ -161,7 +161,7 @@ describe('API Routes', () => {
         .send({});
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Word is required');
+      expect(res.body).toHaveProperty('error', 'validation_failed');
     });
 
     it('returns 500 when AI call fails', async () => {
@@ -208,7 +208,7 @@ describe('API Routes', () => {
         .send({});
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Text is required');
+      expect(res.body).toHaveProperty('error', 'validation_failed');
     });
 
     it('returns 400 when voice is not in whitelist', async () => {

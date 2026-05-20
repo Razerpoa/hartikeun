@@ -30,7 +30,7 @@ export function createCache(): WordCache {
         info(`Loaded ${cache.size} items from ${config.CACHE_PATH}`);
       }
     } catch (e) {
-      logError('Error loading word cache:', e);
+      logError('Error loading word cache:', undefined, e);
     }
   }
 
@@ -46,7 +46,7 @@ export function persistCache(cache: WordCache): void {
     fs.writeFileSync(cachePath, JSON.stringify(obj, null, 2));
     info(`Persisted ${cache.size} items to ${config.CACHE_PATH}`);
   } catch (e) {
-    logError('Error saving word cache:', e);
+    logError('Error saving word cache:', undefined, e);
   }
 }
 
@@ -65,12 +65,4 @@ export function stopCachePersistence(): void {
   }
 }
 
-// Legacy export for backward compatibility with existing signatures --
-// loadCache now creates and returns a cache, saveCache persists it.
-export function loadCache(): WordCache {
-  return createCache();
-}
-
-export function saveCache(cache: WordCache): void {
-  persistCache(cache);
-}
+// Legacy export removed. Use createCache and persistCache directly.

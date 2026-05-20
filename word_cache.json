@@ -1,4 +1,81 @@
 {
+  "details:id:ctx:Ke sana (tujuan perg:kadituna": {
+    "word": "kadituna",
+    "pronunciation": "[ka-di-tu-na]",
+    "origin_and_culture": "Kata ini berasal dari bahasa Sunda yang merupakan penggabungan dari kata depan 'ka' (ke/menuju), 'ditu' (sana/di sana), dan akhiran '-na' yang berfungsi sebagai penegas atau kata ganti penunjuk. Secara sosiolinguistik, istilah ini digunakan dalam percakapan sehari-hari untuk merujuk pada arah atau tujuan yang letaknya lebih jauh dari pembicara, sering kali menyiratkan lokasi spesifik yang sudah dibicarakan sebelumnya.",
+    "usage_examples": [
+      {
+        "sentence": "Ari tos nepi ka terminal, anjeun kantun neraskeun lalampahan kadituna ku angkot.",
+        "translation": "Kalau sudah sampai di terminal, kamu tinggal meneruskan perjalanan ke sananya pakai angkot.",
+        "context": "Memberikan petunjuk arah kepada seseorang dalam percakapan santai.",
+        "dialect": "Sunda"
+      },
+      {
+        "sentence": "Abdi bade angkat ka Bandung, kadituna panginten bade teras ka Jakarta.",
+        "translation": "Saya mau pergi ke Bandung, ke sananya nanti mungkin mau lanjut ke Jakarta.",
+        "context": "Menjelaskan rencana perjalanan atau tujuan lanjutan.",
+        "dialect": "Sunda"
+      },
+      {
+        "sentence": "Mending kumpul di dieu heula, urusan kadituna urang pikirkeun engké.",
+        "translation": "Mending kumpul di sini dulu, urusan ke sananya (kelanjutannya) kita pikirkan nanti.",
+        "context": "Menunda diskusi mengenai rencana atau langkah masa depan.",
+        "dialect": "Sunda"
+      }
+    ],
+    "synonyms": [
+      "ka ditu",
+      "ka sanana",
+      "terusanna"
+    ],
+    "antonyms": [
+      "kamari",
+      "kadieu"
+    ]
+  },
+  "transform:id:50:ai maneh kadituna jeng saha": {
+    "analysis": {
+      "detected_dialect": "Sundanese",
+      "input_tone_rating": "Informal/Casual",
+      "core_intent_summary": "Menanyakan dengan siapa lawan bicara akan pergi.",
+      "context": "Percakapan santai di mana seseorang bertanya kepada temannya tentang rencana pergi mereka.",
+      "detected_tone": "Santai dan penasaran"
+    },
+    "translations": {
+      "formal_indonesian": "Apakah kamu akan pergi dengan siapa?",
+      "daily_indonesian": "Lu perginya sama siapa?",
+      "professional_english": "Who are you going with?"
+    },
+    "vocabulary_breakdown": [
+      {
+        "original_word": "ai",
+        "meaning_and_context": "Kata tanya pembuka dalam bahasa Sunda, sering digunakan untuk memulai pertanyaan",
+        "is_proper_name": false
+      },
+      {
+        "original_word": "maneh",
+        "meaning_and_context": "Cara santai menyebut 'kamu' dalam bahasa Sunda, hanya digunakan untuk teman sebaya",
+        "is_proper_name": false
+      },
+      {
+        "original_word": "kadituna",
+        "meaning_and_context": "Ke sana (tujuan perginya)",
+        "is_proper_name": false
+      },
+      {
+        "original_word": "jeng",
+        "meaning_and_context": "Singkatan dari 'jeung' yang berarti 'dengan'",
+        "is_proper_name": false
+      },
+      {
+        "original_word": "saha",
+        "meaning_and_context": "Siapa",
+        "is_proper_name": false
+      }
+    ],
+    "is_chat": false,
+    "is_gibberish": false
+  },
   "details:id:ctx:Ke sana (gabungan ka:kadituna": {
     "word": "kadituna",
     "pronunciation": "[ka-di-tu-na]",
