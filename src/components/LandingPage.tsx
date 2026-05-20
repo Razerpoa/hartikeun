@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowRight, 
   Sparkles
@@ -15,16 +15,99 @@ interface LandingPageProps {
 export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
   const navigate = useNavigate();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [subjectIndex, setSubjectIndex] = useState(0);
 
   useEffect(() => {
-    // Mark as animated after initial sequence would have completed
     const timer = setTimeout(() => setHasAnimated(true), 1500);
-    return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      setSubjectIndex((prev) => (prev + 1) % 7);
+    }, 4000);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const t = useI18n(uiLang).landing;
   const heroWords = t.hero.split(" ");
   const targetIndex = heroWords.length - 1;
+
+  const subjects = {
+    en: ["friends'", "clients", "son's", "others'", "boss'", "date's", "sibling's"],
+    id: ["temen", "clients", "putra", "lainnya", "bos", "gebetan", "adik"]
+  };
+
+  const bubbleConversations = {
+    en: [
+      {
+        sender: "Bro, your gyatt is so skibidi rizzler, no cap!",
+        receiver: "Wait, what does that even mean?"
+      },
+      {
+        sender: "Please action this ASAP, need to align with stakeholders for maximum synergy.",
+        receiver: "You mean act quickly and discuss with them?"
+      },
+      {
+        sender: "Dad, I was mewing while watching a Roblox stream, that rizz was Ohio style!",
+        receiver: "Mewing? Ohio? Son, talk normal please!"
+      },
+      {
+        sender: "Come here and try some kapurung, it is so delicious!",
+        receiver: "Kapurung? Is that a traditional Sulawesi dish?"
+      },
+      {
+        sender: "Hey, let's circle back offline, just a quick sync to action the deliverables.",
+        receiver: "Circle back? Action? Can we just talk normal for a second?"
+      },
+      {
+        sender: "He said he'd slide into my DMs but now he's ghosting — red flag bestie!",
+        receiver: "Slide? Ghosting? Is this English or a whole new language?"
+      },
+      {
+        sender: "Bro I just clutched a 1v5 in ranked, the whole lobby went crazy!",
+        receiver: "Clutched? 1v5? Are you speaking gamer or English?"
+      }
+    ],
+    id: [
+      {
+        sender: "Maneh gera gera cek khodam, aing mah khodam maung sigma",
+        receiver: "Hah?, ngomong apa sih?"
+      },
+      {
+        sender: "Tolong dong ASAP, tolong di-align sama stakeholders biar synergy-nya dapet",
+        receiver: "Maksudnya kerja cepat dan didiskusikan?"
+      },
+      {
+        sender: "Piksen mewing mukbang di Roblox kece parah, rizz-nya menyala abangku!",
+        receiver: "Roblox apanya? Mewing itu apa lagi?!"
+      },
+      {
+        sender: "Sini ki' makan kapurung, naenaknya kapurung buatan mamaku!",
+        receiver: "Kapurung? Makanan khas Sulawesi ya?"
+      },
+      {
+        sender: "Tolong di-CC-in semua stakeholder untuk one-on-one meeting ASAP ya.",
+        receiver: "Maksudnya diundang rapat? Ngomongnya dipersingkat dong!"
+      },
+      {
+        sender: "Dia bilang mau chat tapi malah ghosting, red flag banget sih bestie!",
+        receiver: "Ghosting? Red flag? Bestie? Kakakmu ini udah tua, sabar ya..."
+      },
+      {
+        sender: "Kak gue baru aja FTL di turnamen, direct message gue di-blast fans!",
+        receiver: "FTL? di-blast? Adik, kakak nggak ngerti bahasa internet kamu..."
+      }
+    ]
+  };
+
+  const subjectWordIndex = heroWords.findIndex(
+    w => w.toLowerCase().startsWith('friends') || w.toLowerCase() === 'temen'
+  );
+
+  const displayHeroWords = [...heroWords];
+  if (subjectWordIndex !== -1) {
+    displayHeroWords[subjectWordIndex] = subjects[uiLang][subjectIndex];
+  }
 
   return (
     <motion.div 
@@ -125,7 +208,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
         <div className="flex-1 flex flex-col items-start text-left w-full">
           <div className="mb-8 md:mb-12 max-w-3xl">
             <h1 className={`text-5xl sm:text-7xl lg:text-8xl font-serif font-black text-white italic leading-[0.9] ${uiLang === 'id' ? 'tracking-tighter' : ''}`}>
-              {heroWords.map((word, i) => {
+              {displayHeroWords.map((word, i) => {
                 const styles = [
                   "text-white",
                   "text-white font-sans tracking-tighter not-italic font-black underline decoration-brand-amber/50 underline-offset-[12px]",
@@ -136,6 +219,41 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
                 
                 // Keep the second word underlined as before
                 const underlinedIndex = 1; 
+                
+                const styleClass = `${i === underlinedIndex ? styles[1] : styles[i > underlinedIndex ? (i % styles.length) : (i % styles.length)]}`;
+                
+                if (subjectWordIndex !== -1 && i === subjectWordIndex) {
+                  return (
+                    <span key={i} className={`${styleClass} mr-3 inline-block transform transition-colors cursor-default origin-bottom relative`}>
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={word}
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 20 }}
+                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          {word}
+                        </motion.span>
+                      </AnimatePresence>
+                      {i === targetIndex && (
+                        <motion.span 
+                          initial={hasAnimated ? false : { opacity: 0, scale: 0, rotate: -120 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 15 }}
+                          transition={{ 
+                            delay: hasAnimated ? 0 : 1.0, 
+                            duration: 1.3, 
+                            ease: [0.16, 1, 0.3, 1] 
+                          }}
+                          style={{ transformOrigin: 'bottom center' }}
+                          className="absolute top-1 -right-4 sm:top-2 sm:-right-6 text-4xl sm:text-7xl text-brand-amber font-serif italic select-none z-50"
+                        >
+                          ?
+                        </motion.span>
+                      )}
+                    </span>
+                  );
+                }
                 
                 return (
                   <motion.span 
@@ -152,7 +270,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
                       rotate: i % 2 === 0 ? 1 : -1,
                       transition: { duration: 0.2 } 
                     }}
-                    className={`${i === underlinedIndex ? styles[1] : styles[i > underlinedIndex ? (i % styles.length) : (i % styles.length)]} mr-3 inline-block transform transition-colors cursor-default origin-bottom relative`}
+                    className={`${styleClass} mr-3 inline-block transform transition-colors cursor-default origin-bottom relative`}
                   >
                     {word}
                     {i === targetIndex && (
@@ -222,12 +340,34 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
           {/* Decorative Glow */}
           <div className="absolute inset-0 bg-brand-amber/5 blur-[100px] -z-10 rounded-full" />
           
-          <div className="self-start bg-white/5 border border-white/10 px-6 py-4 rounded-3xl rounded-bl-none text-sm text-slate-100 font-medium italic shadow-2xl backdrop-blur-xl">
-            "Maneh gera gera cek khodam, aing mah khodam maung sigma"
+          <div className="min-h-[4.5rem] flex items-center justify-start">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`sender-${subjectIndex}`}
+                initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="self-start bg-white/5 border border-white/10 px-6 py-4 rounded-3xl rounded-bl-none text-sm text-slate-100 font-medium italic shadow-2xl backdrop-blur-xl"
+              >
+                "{bubbleConversations[uiLang][subjectIndex].sender}"
+              </motion.div>
+            </AnimatePresence>
           </div>
           
-          <div className="self-end bg-brand-amber/20 border border-brand-amber/30 px-6 py-4 rounded-3xl rounded-br-none text-sm text-brand-amber font-black shadow-2xl backdrop-blur-xl -mt-2 ml-8">
-            "Hah?, ngomong apa sih?"
+          <div className="min-h-[3.5rem] flex items-center justify-end">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`receiver-${subjectIndex}`}
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+                className="self-end bg-brand-amber/20 border border-brand-amber/30 px-6 py-4 rounded-3xl rounded-br-none text-sm text-brand-amber font-black shadow-2xl backdrop-blur-xl ml-8"
+              >
+                "{bubbleConversations[uiLang][subjectIndex].receiver}"
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <motion.div 
