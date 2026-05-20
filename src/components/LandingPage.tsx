@@ -222,44 +222,57 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
                 
                 const styleClass = `${i === underlinedIndex ? styles[1] : styles[i > underlinedIndex ? (i % styles.length) : (i % styles.length)]}`;
                 
+                // 1. Detect if this is the subject word
                 if (subjectWordIndex !== -1 && i === subjectWordIndex) {
+                  // 2. Render subject word AND next word together
+                  const nextWord = displayHeroWords[i + 1];
+                  
                   return (
-                    <motion.span 
-                      key={i}
-                      initial={hasAnimated ? false : { opacity: 0, y: 40, rotateX: -90, scale: 0.8 }}
-                      animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-                      transition={{ duration: 0.8, delay: hasAnimated ? 0 : 0.4 + (i * 0.1), ease: [0.16, 1, 0.3, 1] }}
-                      className={`${styleClass} mr-3 inline-block transform transition-colors cursor-default origin-bottom relative`}
-                      style={{ minWidth: '11ch' }}
-                    >
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={word}
-                          initial={{ opacity: 0, y: -20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 20 }}
-                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          {word}
-                        </motion.span>
-                      </AnimatePresence>
-                      {i === targetIndex && (
-                        <motion.span 
-                          initial={hasAnimated ? false : { opacity: 0, scale: 0, rotate: -120 }}
-                          animate={{ opacity: 1, scale: 1, rotate: 15 }}
-                          transition={{ 
-                            delay: hasAnimated ? 0 : 1.0, 
-                            duration: 1.3, 
-                            ease: [0.16, 1, 0.3, 1] 
-                          }}
-                          style={{ transformOrigin: 'bottom center' }}
-                          className="absolute top-1 -right-4 sm:top-2 sm:-right-6 text-4xl sm:text-7xl text-brand-amber font-serif italic select-none z-50"
-                        >
-                          ?
-                        </motion.span>
-                      )}
-                    </motion.span>
+                    <span key={i} className="inline-block whitespace-nowrap">
+                      <motion.span 
+                        initial={hasAnimated ? false : { opacity: 0, y: 40, rotateX: -90, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+                        transition={{ duration: 0.8, delay: hasAnimated ? 0 : 0.4 + (i * 0.1), ease: [0.16, 1, 0.3, 1] }}
+                        className={`${styleClass} mr-3 inline-block transform transition-colors cursor-default origin-bottom relative`}
+                        style={{ minWidth: '11ch', display: 'inline-block' }}
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={word}
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            {word}
+                          </motion.span>
+                        </AnimatePresence>
+                        {i === targetIndex && (
+                          <motion.span 
+                            initial={hasAnimated ? false : { opacity: 0, scale: 0, rotate: -120 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 15 }}
+                            transition={{ 
+                              delay: hasAnimated ? 0 : 1.0, 
+                              duration: 1.3, 
+                              ease: [0.16, 1, 0.3, 1] 
+                            }}
+                            style={{ transformOrigin: 'bottom center' }}
+                            className="absolute top-1 -right-4 sm:top-2 sm:-right-6 text-4xl sm:text-7xl text-brand-amber font-serif italic select-none z-50"
+                          >
+                            ?
+                          </motion.span>
+                        )}
+                      </motion.span>
+                      
+                      {/* Next word */}
+                      <span className={styleClass}> {nextWord}</span>
+                    </span>
                   );
+                }
+                
+                // 3. Skip the next word in the loop if it was just rendered
+                if (subjectWordIndex !== -1 && i === subjectWordIndex + 1) {
+                  return null;
                 }
                 
                 return (
