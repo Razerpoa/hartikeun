@@ -223,11 +223,11 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
           <div className="absolute inset-0 bg-brand-amber/5 blur-[100px] -z-10 rounded-full" />
           
           <div className="self-start bg-white/5 border border-white/10 px-6 py-4 rounded-3xl rounded-bl-none text-sm text-slate-100 font-medium italic shadow-2xl backdrop-blur-xl">
-            "Menyala abangkuu 🔥🔥 cek khodam dulu sebelum gas!"
+            "Maneh gera gera cek khodam, aing mah khodam maung sigma"
           </div>
           
           <div className="self-end bg-brand-amber/20 border border-brand-amber/30 px-6 py-4 rounded-3xl rounded-br-none text-sm text-brand-amber font-black shadow-2xl backdrop-blur-xl -mt-2 ml-8">
-            "Waduh, udah masuk ombak nih 🤣"
+            "Hah?, ngomong apa sih?"
           </div>
 
           <motion.div 

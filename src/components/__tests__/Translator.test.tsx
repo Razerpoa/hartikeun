@@ -37,7 +37,7 @@ describe('Translator', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByPlaceholderText(/Enter slang, local greetings, or dialect here/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Type slang, dialect, Gen-Z lingo, or any language/i)).toBeInTheDocument();
     expect(screen.getByText(/Translate Meaning/i)).toBeInTheDocument();
   });
 
