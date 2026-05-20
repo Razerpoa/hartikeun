@@ -76,7 +76,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
             }}
             className="absolute w-24 h-24 border border-brand-amber/10 rounded-lg flex items-center justify-center text-[10px] text-brand-amber/20 font-black uppercase tracking-widest"
           >
-            {["Naon", "Opo", "Lur", "Kuy", "Bray"][i]}
+            {["Skibidi", "Sigma", "Rizz", "Menyala", "Bray"][i]}
           </motion.div>
         ))}
       </div>
@@ -223,11 +223,11 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
           <div className="absolute inset-0 bg-brand-amber/5 blur-[100px] -z-10 rounded-full" />
           
           <div className="self-start bg-white/5 border border-white/10 px-6 py-4 rounded-3xl rounded-bl-none text-sm text-slate-100 font-medium italic shadow-2xl backdrop-blur-xl">
-            "Bray, engke ngojay ka aboh yap"
+            "Menyala abangkuu 🔥🔥 cek khodam dulu sebelum gas!"
           </div>
           
           <div className="self-end bg-brand-amber/20 border border-brand-amber/30 px-6 py-4 rounded-3xl rounded-br-none text-sm text-brand-amber font-black shadow-2xl backdrop-blur-xl -mt-2 ml-8">
-            "Hah? ngomong apa sih?."
+            "Waduh, udah masuk ombak nih 🤣"
           </div>
 
           <motion.div 
@@ -251,7 +251,7 @@ export const LandingPage: FC<LandingPageProps> = ({ uiLang, setUiLang }) => {
           className="flex gap-20 whitespace-nowrap text-[80px] sm:text-[140px] font-serif italic font-black text-white/10 uppercase"
         >
           {[...Array(10)].map((_, i) => (
-            <span key={i}>Hartikeun Ceunah Sia Bray Naon Opo Lur Camana</span>
+            <span key={i}>Hartikeun Skibidi Sigma Rizz Menyala Abangku Cek Khodam Bray</span>
           ))}
         </motion.div>
       </div>
