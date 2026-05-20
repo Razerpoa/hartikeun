@@ -1,6 +1,33 @@
+const ABBREVIATION_MAP: Record<string, string> = {
+  yg: 'yang',
+  ga: 'tidak',
+  gk: 'tidak',
+  g: 'tidak',
+  bgt: 'banget',
+  gw: 'saya',
+  gue: 'saya',
+  dgn: 'dengan',
+  utk: 'untuk',
+  dlm: 'dalam',
+  sdh: 'sudah',
+  udh: 'sudah',
+  bkn: 'bukan',
+  kl: 'kalau',
+  klo: 'kalau',
+};
+
 export function normalizeSlang(text: string): string {
   return text.split(/(\s+)/).map(w => {
     if (/^\s+$/.test(w)) return w;
+
+    // Step 1: Expand common Indonesian text-speak abbreviations.
+    // The word is a full token from splitting on whitespace, so "ga" inside "bangga"
+    // will never match (it would be the token "bangga").
+    const lower = w.toLowerCase();
+    const expanded = ABBREVIATION_MAP[lower];
+    if (expanded) {
+      w = expanded;
+    }
 
     // If word is entirely repeated vowels (e.g., aa, aaaa, uuu)
     // Normalize to exactly 2 characters (e.g., "aa", "ee") to preserve meanings like 'aa' (kakak)

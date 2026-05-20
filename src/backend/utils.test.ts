@@ -49,6 +49,39 @@ describe('normalizeSlang', () => {
     expect(normalizeSlang('123')).toBe('123');
   });
 
+  it('expands common Indonesian text-speak abbreviations', () => {
+    expect(normalizeSlang('yg')).toBe('yang');
+    expect(normalizeSlang('ga')).toBe('tidak');
+    expect(normalizeSlang('gk')).toBe('tidak');
+    expect(normalizeSlang('g')).toBe('tidak');
+    expect(normalizeSlang('bgt')).toBe('banget');
+    expect(normalizeSlang('gw')).toBe('saya');
+    expect(normalizeSlang('gue')).toBe('saya');
+    expect(normalizeSlang('dgn')).toBe('dengan');
+    expect(normalizeSlang('utk')).toBe('untuk');
+    expect(normalizeSlang('dlm')).toBe('dalam');
+    expect(normalizeSlang('sdh')).toBe('sudah');
+    expect(normalizeSlang('udh')).toBe('sudah');
+    expect(normalizeSlang('bkn')).toBe('bukan');
+    expect(normalizeSlang('kl')).toBe('kalau');
+    expect(normalizeSlang('klo')).toBe('kalau');
+  });
+
+  it('applies abbreviations before vowel/consonant collapsing', () => {
+    expect(normalizeSlang('yg ga bgt')).toBe('yang tidak banget');
+    expect(normalizeSlang('gw udh dgn gue')).toBe('saya sudah dengan saya');
+    expect(normalizeSlang('g dlm kl')).toBe('tidak dalam kalau');
+  });
+
+  it('does not match abbreviations inside other words', () => {
+    expect(normalizeSlang('bangga')).toBe('bangga');
+    expect(normalizeSlang('igalau')).toBe('igalau');
+  });
+
+  it('preserves whitespace with abbreviation expansion', () => {
+    expect(normalizeSlang('yg   ga   bgt')).toBe('yang   tidak   banget');
+  });
+
   it('handles mixed content with various patterns', () => {
     expect(normalizeSlang('kumaha aa aaaa')).toBe('kumaha aa aa');
   });
