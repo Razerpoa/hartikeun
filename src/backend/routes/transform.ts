@@ -51,8 +51,22 @@ export function registerTransformRoute(app: Express, deps: RouteDeps): void {
 
       const targetLangName = lang === 'id' ? 'Indonesian' : 'English';
 
-      const baseSystemPrompt = `You are an expert Indonesian linguist and cultural bridge.
-Decode casual regional dialects (Sundanese, Javanese, Betawi, etc.), slang, or text from images into standard forms.
+      const baseSystemPrompt = `You are a Polyglot Cultural Interpreter — an expert linguist specializing in Indonesian languages and cross-cultural communication.
+
+YOUR ROLE:
+Decode any human language input — including casual regional dialects (Sundanese, Javanese, Betawi, etc.), slang, foreign languages, or text from images — into accurate translations with cultural context and educational insights.
+
+LANGUAGE DETECTION & ROUTING:
+1. Detect the input language/variety. Set "language_variety" to the detected language/variety name (e.g., "Japanese", "Sundanese", "English", "Indonesian Standard", "Javanese").
+2. IF the input is NON-INDONESIAN (not Indonesian, Malay, or any regional Indonesian language/dialect):
+   - Translate INTO these three forms:
+     a) formal_indonesian: Standard Baku Indonesian (strictly KBBI/EYD).
+     b) daily_indonesian: Natural casual Indonesian (Gen Z/Millennial style, e.g., 'aja', 'nggak', 'udah').
+     c) professional_english: Clear, natural English.
+   - Provide vocabulary_breakdown explaining the original foreign words.
+3. IF the input IS INDONESIAN (including Sundanese, Javanese, Betawi, Minang, Balinese, etc.):
+   - Provide the same three output forms (Standard Indonesian, Daily Indonesian, Professional English).
+   - Provide deep dialect analysis in the analysis section (detected_dialect, regional origin).
 
 CHAT DETECTION & EXTRACTION:
 If the input is a screenshot of a messaging app (WhatsApp, iMessage, etc.) OR if the text input contains tags like [SELF] or [OTHER]:
@@ -101,11 +115,23 @@ JSON EXAMPLE FOR CHAT:
 }
 
 FOR ALL INPUTS (NON-CHAT):
-... (existing logic for single text chunks) ...
 Translations required:
 1. formal_indonesian: Standard Baku (strictly KBBI/EYD).
 2. daily_indonesian: Modern, natural casual (Gen Z/Millennial style, e.g., 'aja', 'nggak', 'udah').
 3. professional_english: High-quality, clear English.
+
+VOCABULARY BREAKDOWN:
+Always provide vocabulary_breakdown for key words — foreign words, slang, dialect terms, or interesting expressions. Each entry must include the original word, its meaning and context, and whether it is a proper name.
+
+LEARNING INSIGHT:
+For every input, provide a "learning_insight" object containing:
+- detected_language: The detected source language/variety name.
+- language_family: The language family (e.g., "Austronesian", "Japonic", "Germanic", "Sino-Tibetan", "Atlantic-Congo").
+- cultural_context: A brief interesting cultural note about the expression or language (1-2 sentences).
+- comparison_table: Array comparing the phrase across languages with "phrase", "language", and "meaning" fields.
+
+CUSTOM DICTIONARY REFERENCE:
+The user message may include custom dictionary entries at the end. Use these as authoritative references for specific word translations.
 
 CRITICAL RULES:
 1. Preserve original line breaks and newlines exactly.
@@ -156,6 +182,28 @@ CRITICAL RULES:
               is_chat: { type: Type.BOOLEAN },
               is_gibberish: { type: Type.BOOLEAN },
               error_message: { type: Type.STRING },
+              language_variety: { type: Type.STRING },
+              learning_insight: {
+                type: Type.OBJECT,
+                properties: {
+                  detected_language: { type: Type.STRING },
+                  language_family: { type: Type.STRING },
+                  cultural_context: { type: Type.STRING },
+                  comparison_table: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        phrase: { type: Type.STRING },
+                        language: { type: Type.STRING },
+                        meaning: { type: Type.STRING }
+                      },
+                      required: ['phrase', 'language', 'meaning']
+                    }
+                  }
+                },
+                required: ['detected_language']
+              },
               messages: {
                 type: Type.ARRAY,
                 items: {
@@ -222,7 +270,7 @@ CRITICAL RULES:
                 }
               }
             },
-            required: ['analysis', 'translations', 'vocabulary_breakdown']
+            required: ['analysis', 'translations', 'vocabulary_breakdown', 'language_variety', 'learning_insight']
           }
         }
       });

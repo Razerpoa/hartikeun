@@ -21,6 +21,15 @@ describe('Validation Schemas', () => {
       expect(result.success).toBe(false);
     });
 
+    it('defaults lang to id when not provided', () => {
+      const input = { text: 'hello' };
+      const result = transformSchema.safeParse(input);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.lang).toBe('id');
+      }
+    });
+
     it('fails when text is too long', () => {
       const input = { text: 'a'.repeat(5001) };
       const result = transformSchema.safeParse(input);

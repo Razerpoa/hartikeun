@@ -22,7 +22,9 @@ export default defineConfig(({mode}) => {
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {
         ignored: [
-          'word_cache.json'
+          '**/word_cache.json',
+          '**/custom_dictionary.json',
+          '**/.*'
         ]
       },
     },

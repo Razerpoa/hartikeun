@@ -67,6 +67,7 @@ describe('API Routes', () => {
     const transformResponse = {
       is_chat: false,
       is_gibberish: false,
+      language_variety: 'Indonesian',
       translations: {
         formal_indonesian: 'Halo',
         daily_indonesian: 'Halo',
@@ -80,9 +81,17 @@ describe('API Routes', () => {
         detected_tone: 'Neutral',
       },
       vocabulary_breakdown: [],
+      learning_insight: {
+        detected_language: 'Indonesian',
+        language_family: 'Austronesian',
+        cultural_context: 'Standard Indonesian greeting.',
+        comparison_table: [
+          { phrase: 'Halo', language: 'Indonesian', meaning: 'Hello' },
+        ],
+      },
     };
 
-    it('returns 200 with transformed text', async () => {
+    it('returns 200 with transformed text including language_variety and learning_insight', async () => {
       mockGenerateContent.mockResolvedValue({
         text: JSON.stringify(transformResponse),
       });
@@ -93,6 +102,12 @@ describe('API Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(transformResponse);
+      expect(res.body).toHaveProperty('language_variety', 'Indonesian');
+      expect(res.body).toHaveProperty('learning_insight');
+      expect(res.body.learning_insight).toHaveProperty('detected_language', 'Indonesian');
+      expect(res.body.learning_insight).toHaveProperty('language_family', 'Austronesian');
+      expect(res.body.learning_insight).toHaveProperty('cultural_context');
+      expect(res.body.learning_insight).toHaveProperty('comparison_table');
     });
 
     it('returns 400 when text and image are both missing', async () => {
@@ -122,6 +137,59 @@ describe('API Routes', () => {
 
       expect(res.status).toBe(500);
       expect(res.body).toHaveProperty('error', 'Failed to transform text');
+    });
+
+    it('returns 200 with learning_insight for foreign language input (Japanese)', async () => {
+      const foreignResponse = {
+        is_chat: false,
+        is_gibberish: false,
+        language_variety: 'Japanese',
+        translations: {
+          formal_indonesian: 'Terima kasih',
+          daily_indonesian: 'Makasih',
+          professional_english: 'Thank you',
+        },
+        analysis: {
+          detected_dialect: 'Standard Japanese',
+          input_tone_rating: 'Polite',
+          core_intent_summary: 'Expressing gratitude',
+          context: 'Polite thank you',
+          detected_tone: 'Polite',
+        },
+        vocabulary_breakdown: [
+          {
+            original_word: 'Arigatou',
+            meaning_and_context: 'Thank you (Japanese, casual)',
+            is_proper_name: false,
+          },
+        ],
+        learning_insight: {
+          detected_language: 'Japanese',
+          language_family: 'Japonic',
+          cultural_context: 'Arigatou is a common Japanese expression of gratitude.',
+          comparison_table: [
+            { phrase: 'Arigatou', language: 'Japanese', meaning: 'Thank you' },
+            { phrase: 'Terima kasih', language: 'Indonesian', meaning: 'Thank you' },
+          ],
+        },
+      };
+
+      mockGenerateContent.mockResolvedValue({
+        text: JSON.stringify(foreignResponse),
+      });
+
+      const res = await request(app)
+        .post('/api/transform')
+        .send({ text: 'Arigatou', tone: 50, lang: 'id' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.language_variety).toBe('Japanese');
+      expect(res.body.learning_insight).toBeDefined();
+      expect(res.body.learning_insight.detected_language).toBe('Japanese');
+      expect(res.body.learning_insight.language_family).toBe('Japonic');
+      expect(res.body.learning_insight.cultural_context).toContain('Japanese');
+      expect(res.body.vocabulary_breakdown).toHaveLength(1);
+      expect(res.body.vocabulary_breakdown[0].original_word).toBe('Arigatou');
     });
   });
 

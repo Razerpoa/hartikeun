@@ -36,6 +36,10 @@ export interface I18nDict {
     imageBtn: string;
     imageDesc: string;
     removeBtn: string;
+    discoveryTitle: string;
+    detectedLangLabel: string;
+    culturalNoteLabel: string;
+    deepDiveLabel: string;
   };
   wordDetails: {
     pronunciation: string;
@@ -86,7 +90,11 @@ export const i18n: Record<'id' | 'en', I18nDict> = {
       tokenContextLabel: "Context & Meaning",
       imageBtn: "Add Image",
       imageDesc: "Upload or take a screenshot",
-      removeBtn: "Remove"
+      removeBtn: "Remove",
+      discoveryTitle: "Language Discovery",
+      detectedLangLabel: "Detected Language",
+      culturalNoteLabel: "Cultural Context",
+      deepDiveLabel: "Deep Dive"
     },
     wordDetails: {
       pronunciation: "Pronunciation Guide",
@@ -135,7 +143,11 @@ export const i18n: Record<'id' | 'en', I18nDict> = {
       tokenContextLabel: "Konteks & Makna",
       imageBtn: "Tambah Gambar",
       imageDesc: "Unggah atau ambil tangkapan layar",
-      removeBtn: "Hapus"
+      removeBtn: "Hapus",
+      discoveryTitle: "Penemuan Bahasa",
+      detectedLangLabel: "Bahasa Terdeteksi",
+      culturalNoteLabel: "Konteks Budaya",
+      deepDiveLabel: "Deep Dive"
     },
     wordDetails: {
       pronunciation: "Cara Pengucapan",

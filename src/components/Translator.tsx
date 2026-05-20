@@ -98,7 +98,9 @@ export const Translator: FC<{
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Transformation failed');
+        // Extract readable message from validation details
+        const message = errorData.details?.[0]?.message || errorData.error || 'Transformation failed';
+        throw new Error(message);
       }
       
       const data = await response.json();
@@ -158,7 +160,7 @@ export const Translator: FC<{
 
       {/* Main Workspace with Floating UI layout */}
       <div className={`flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 transition-all duration-500 ${!isActive ? 'flex items-center justify-center' : ''}`}>
-        <main className={`w-full mx-auto grid grid-cols-12 gap-0 bg-surface-subtle sm:rounded-3xl border border-white/5 shadow-2xl relative transition-all duration-700 ${isActive ? 'max-w-5xl h-full lg:h-[calc(100vh-200px)] overflow-hidden lg:overflow-hidden' : 'max-w-2xl h-auto rounded-[2rem]'}`}>
+        <main className={`w-full mx-auto grid grid-cols-12 gap-0 bg-surface-subtle sm:rounded-3xl border border-white/5 shadow-2xl relative transition-all duration-700 ${isActive ? 'max-w-5xl h-full lg:h-[calc(100vh-200px)]' : 'max-w-2xl h-auto rounded-[2rem]'}`}>
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
           
           {/* Left Pane: Input */}
@@ -464,6 +466,7 @@ export const Translator: FC<{
                           </div>
                         </div>
                       ) : (
+                        <>
                         <div className="space-y-0">
                           <div className="p-6 sm:p-8 border-b border-white/5 relative group bg-surface-base">
                             <div className="flex justify-between items-center mb-6 gap-4">
@@ -495,7 +498,42 @@ export const Translator: FC<{
                             </p>
                           </div>
                         </div>
-                      )}
+                        {result.learning_insight && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                            className="p-6 sm:p-8 bg-surface-base border-t border-dashed border-brand-amber/20"
+                          >
+                            <div className="flex items-center gap-3 mb-6">
+                              <Sparkles size={16} className="text-brand-amber" />
+                              <h3 className="text-[10px] sm:text-xs text-white uppercase tracking-[0.2em] font-semibold">
+                                {currentUi.discoveryTitle}
+                              </h3>
+                            </div>
+                            {result.learning_insight.detected_language && (
+                              <div className="mb-4 flex items-start gap-3">
+                                <span className="text-[9px] uppercase font-bold text-slate-500 mt-0.5">{currentUi.detectedLangLabel}</span>
+                                <span className="px-2.5 py-1 bg-brand-amber/10 border border-brand-amber/20 rounded text-[11px] text-brand-amber font-medium">
+                                  {result.learning_insight.detected_language}
+                                </span>
+                              </div>
+                            )}
+                            {result.learning_insight.cultural_explanation && (
+                              <div className="mb-4">
+                                <span className="text-[9px] uppercase font-bold text-slate-500 block mb-2">{currentUi.culturalNoteLabel}</span>
+                                <p className="text-sm text-slate-300 leading-relaxed italic">"{result.learning_insight.cultural_explanation}"</p>
+                              </div>
+                            )}
+                            {result.learning_insight.etymology && (
+                              <div>
+                                <span className="text-[9px] uppercase font-bold text-slate-500 block mb-2">{currentUi.deepDiveLabel}</span>
+                                <p className="text-sm text-slate-300 leading-relaxed">{result.learning_insight.etymology}</p>
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
+                        </>)}
                   </motion.div>
                 ) : null}
               </AnimatePresence>
