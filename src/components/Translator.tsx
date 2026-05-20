@@ -381,7 +381,7 @@ export const Translator: FC<{
         </section>
 
           {isActive && (
-            <section className="col-span-12 lg:col-span-7 flex flex-col bg-surface-base/20 border-l border-white/5 overflow-y-auto min-h-[400px] lg:min-h-0 relative z-10">
+            <section className="col-span-12 lg:col-span-7 flex flex-col bg-surface-base/20 border-l border-white/5 overflow-y-auto min-h-[400px] lg:min-h-0 relative z-20">
               <AnimatePresence mode="wait">
                 {loading ? (
                   <motion.div
@@ -449,7 +449,7 @@ export const Translator: FC<{
                               {result.messages.length} Messages Detected
                             </div>
                           </div>
-                          <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                          <div className="flex-1 space-y-2 pr-2">
                             {result.messages.map((msg, i) => (
                               <ChatMessageBubble 
                                 key={i} 

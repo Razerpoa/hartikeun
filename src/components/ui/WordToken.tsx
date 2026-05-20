@@ -13,6 +13,7 @@ export const WordToken: FC<{
   const [isHovered, setIsHovered] = useState(false);
   const tokenRef = useRef<HTMLSpanElement>(null);
   const [alignment, setAlignment] = useState<'left' | 'center' | 'right'>('center');
+  const [position, setPosition] = useState<'top' | 'bottom'>('top');
   const navigate = useNavigate();
   
   const isDefault = variant === 'default';
@@ -26,12 +27,20 @@ export const WordToken: FC<{
       const rect = tokenRef.current.getBoundingClientRect();
       const screenWidth = window.innerWidth;
       
+      // Horizontal alignment
       if (rect.left < 150) {
         setAlignment('left');
       } else if (screenWidth - rect.right < 150) {
         setAlignment('right');
       } else {
         setAlignment('center');
+      }
+
+      // Vertical position (flip if too close to top)
+      if (rect.top < 250) {
+        setPosition('bottom');
+      } else {
+        setPosition('top');
       }
     }
     setIsHovered(true);
@@ -70,9 +79,9 @@ export const WordToken: FC<{
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`absolute bottom-full mb-3 w-[80vw] sm:w-64 p-4 bg-[#111112] border border-brand-amber/40 rounded-xl shadow-2xl z-50 pointer-events-auto ${alignmentClasses[alignment]}`}
+            className={`absolute ${position === 'top' ? 'bottom-full mb-3' : 'top-full mt-3'} w-[80vw] sm:w-64 p-4 bg-[#111112] border border-brand-amber/40 rounded-xl shadow-2xl z-50 pointer-events-auto ${alignmentClasses[alignment]}`}
           >
-            <div className={`absolute bottom-[-6px] w-3 h-3 bg-[#111112] border-b border-r border-brand-amber/40 rotate-45 ${arrowClasses[alignment]}`} />
+            <div className={`absolute ${position === 'top' ? 'bottom-[-6px] border-b border-r' : 'top-[-6px] border-t border-l'} w-3 h-3 bg-[#111112] border-brand-amber/40 rotate-45 ${arrowClasses[alignment]}`} />
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-brand-amber animate-pulse" />
               <div className="text-[9px] uppercase font-bold text-brand-amber font-mono tracking-widest">

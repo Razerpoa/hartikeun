@@ -1,4 +1,74 @@
 {
+  "details:id:ctx:Slang: biasa saja / :mid": {
+    "word": "mid",
+    "pronunciation": "[mɪd]",
+    "origin_and_culture": "Istilah ini merupakan singkatan dari bahasa Inggris 'middle' (tengah). Dalam budaya internet dan media sosial, 'mid' digunakan sebagai ejekan untuk sesuatu yang kualitasnya biasa saja, tidak istimewa, atau medioker. Istilah ini sering digunakan untuk mengkritik musik, film, atau opini yang dianggap tidak memberikan kesan mendalam.",
+    "usage_examples": [
+      {
+        "sentence": "Film horor yang kemarin kita tonton itu mid banget, gak ada serem-seremnya.",
+        "translation": "Film horor yang kita tonton kemarin itu biasa saja banget, tidak ada seram-seramnya.",
+        "context": "Mengomentari kualitas film yang mengecewakan.",
+        "dialect": "Bahasa Gaul Indonesia"
+      },
+      {
+        "sentence": "Jujur, rasa makanan di kafe baru itu mid, mending makan di warung sebelah.",
+        "translation": "Jujur, rasa makanan di kafe baru itu biasa saja, lebih baik makan di warung sebelah.",
+        "context": "Menilai kualitas rasa makanan.",
+        "dialect": "Bahasa Gaul Indonesia"
+      },
+      {
+        "sentence": "Selera musik dia agak mid, terlalu banyak dengerin lagu yang lagi viral aja.",
+        "translation": "Selera musik dia agak biasa saja, terlalu banyak mendengarkan lagu yang sedang viral saja.",
+        "context": "Menilai selera musik seseorang.",
+        "dialect": "Bahasa Gaul Indonesia"
+      }
+    ],
+    "synonyms": [
+      "medioker",
+      "biasa saja",
+      "rata-rata",
+      "standar"
+    ],
+    "antonyms": [
+      "top-tier",
+      "istimewa",
+      "luar biasa",
+      "premium"
+    ]
+  },
+  "details:id:ctx:Apa (Sundanese):naon": {
+    "word": "naon",
+    "pronunciation": "[na.on]",
+    "origin_and_culture": "Kata 'naon' berasal dari bahasa Sunda yang berfungsi sebagai kata tanya untuk menanyakan sesuatu. Secara sosiolinguistik, kata ini merupakan bentuk standar dalam bahasa Sunda namun sering mengalami modifikasi intonasi atau penyingkatan menjadi 'na' dalam percakapan informal antarteman yang menunjukkan keakraban atau terkadang ketidaksabaran.",
+    "usage_examples": [
+      {
+        "sentence": "Ari maneh nuju naon di dieu?",
+        "translation": "Memangnya kamu sedang apa di sini?",
+        "context": "Bertanya tentang aktivitas seseorang di lokasi tertentu.",
+        "dialect": "Sundanese"
+      },
+      {
+        "sentence": "Naon sih nu dipikasieun ku anjeun teh?",
+        "translation": "Apa sih yang kamu takutkan itu?",
+        "context": "Menanyakan alasan di balik ketakutan atau kecemasan seseorang.",
+        "dialect": "Sundanese"
+      },
+      {
+        "sentence": "Saur sepuh mah, naon nu dipelak eta nu bakal dicokot.",
+        "translation": "Kata orang tua, apa yang ditanam itu yang akan dipanen.",
+        "context": "Menggunakan pepatah untuk menjelaskan hukum sebab akibat.",
+        "dialect": "Sundanese"
+      }
+    ],
+    "synonyms": [
+      "nu naon",
+      "naon-naon",
+      "anu"
+    ],
+    "antonyms": [
+      "henteu nanaon"
+    ]
+  },
   "details:id:ctx:Ke sana (tujuan perg:kadituna": {
     "word": "kadituna",
     "pronunciation": "[ka-di-tu-na]",
