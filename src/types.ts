@@ -35,4 +35,10 @@ export interface TransformationResult {
     meaning_and_context: string;
     is_proper_name: boolean;
   }>;
+  learning_insight?: {
+    detected_language: string;
+    cultural_explanation: string;
+    etymology?: string;
+  };
+  language_variety?: string;
 }

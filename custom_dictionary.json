@@ -1,11 +1,102 @@
 {
-  "maneh": "A casual way to say 'you' in Sundanese, used only with friends of the same age. Avoid using it with older people as it can be considered rude.",
-  "aing": "A very casual and blunt way to say 'I' or 'me' in Sundanese. Often used among close male friends. It's very informal and can sound aggressive if used in the wrong context.",
-  "mabar": "Short for 'Main Bareng' (Play Together). Usually refers to playing online games together.",
-  "gercep": "Short for 'Gerak Cepat' (Move Fast). Used to describe someone who is very responsive or acts quickly.",
-  "gc": "The very shortened version for 'Gerak Cepat'",
-  "tara": "A casual way to say rarely or jarang",
-  "cai": "air or water",
-  "ci": "Another variation of cai or water and air in sundanese",
-  "te": "A really shortened version of hente or tidak in sundanese"
+  "maneh": {
+    "meaning": "A casual way to say 'you' in Sundanese, used only with friends of the same age. Avoid using it with older people as it can be considered rude.",
+    "category": "regional",
+    "usage_note": "Sundanese second-person pronoun. Intimate/casual register. Do not use with elders or strangers."
+  },
+  "aing": {
+    "meaning": "A very casual and blunt way to say 'I' or 'me' in Sundanese. Often used among close male friends. It's very informal and can sound aggressive if used in the wrong context.",
+    "category": "regional",
+    "usage_note": "Sundanese first-person pronoun. Very informal. Can be perceived as arrogant outside close peer groups."
+  },
+  "mabar": {
+    "meaning": "Short for 'Main Bareng' (Play Together). Usually refers to playing online games together.",
+    "category": "slang",
+    "usage_note": "Common in gaming communities. Widely used across Indonesian social media."
+  },
+  "gercep": {
+    "meaning": "Short for 'Gerak Cepat' (Move Fast). Used to describe someone who is very responsive or acts quickly.",
+    "category": "slang",
+    "usage_note": "Popularized by Indonesian content creators. Praises quick action or response time."
+  },
+  "gc": {
+    "meaning": "The very shortened version for 'Gerak Cepat'",
+    "category": "slang",
+    "usage_note": "Even shorter than 'gercep'. Used in fast-paced chat conversations."
+  },
+  "tara": {
+    "meaning": "A casual way to say rarely or jarang",
+    "category": "regional",
+    "usage_note": "Sundanese word. Used conversationally to mean 'seldom' or 'rarely'."
+  },
+  "cai": {
+    "meaning": "air or water",
+    "category": "regional",
+    "usage_note": "Standard Sundanese word for water. Used in everyday conversation."
+  },
+  "ci": {
+    "meaning": "Another variation of cai or water and air in sundanese",
+    "category": "regional",
+    "usage_note": "Shortened form of 'cai'. Common in spoken Sundanese."
+  },
+  "te": {
+    "meaning": "A really shortened version of hente or tidak in sundanese",
+    "category": "regional",
+    "usage_note": "Sundanese negation particle. Extremely shortened, very casual speech."
+  },
+  "adi": {
+    "meaning": "A sundanese version of adik or little sister/brother, This can also be someone else name",
+    "category": "regional",
+    "usage_note": "Can be both a kinship term and a proper name depending on context."
+  },
+  "skibidi": {
+    "meaning": "A nonsense/meme term popularized by the 'Skibidi Toilet' series. Often used as filler or to denote something chaotic or humorous.",
+    "category": "gen-z",
+    "usage_note": "Internet meme slang. Usage is mostly ironic or humorous among Gen Z."
+  },
+  "sigma": {
+    "meaning": "A term for an independent, alpha-but-loner archetype. Someone who operates outside social hierarchies.",
+    "category": "gen-z",
+    "usage_note": "From 'sigma male' internet meme. Can be used sincerely or ironically."
+  },
+  "rizz": {
+    "meaning": "Charisma or romantic appeal. Short for 'charisma'. Used to describe someone's ability to attract a partner.",
+    "category": "gen-z",
+    "usage_note": "Popularized on TikTok. 'W rizz' = good game, 'L rizz' = bad game."
+  },
+  "menyala abangku": {
+    "meaning": "'You're on fire, bro' — a phrase used to hype someone up or acknowledge their impressive achievement.",
+    "category": "internet",
+    "usage_note": "Popular Indonesian meme phrase. Used as high praise among peers."
+  },
+  "cek khodam": {
+    "meaning": "'Check your spiritual familiar' — a trend where someone claims to see a mystical companion (khodam) in a photo or video.",
+    "category": "internet",
+    "usage_note": "Viral TikTok trend in Indonesia. Used humorously to create fake spiritual readings."
+  },
+  "gabut": {
+    "meaning": "A state of being bored and unsure what to do. Short for 'gaji buta' (blind salary) but used to mean aimless boredom.",
+    "category": "slang",
+    "usage_note": "Very common in everyday Indonesian. Crosses age groups and social circles."
+  },
+  "bucin": {
+    "meaning": "Short for 'budak cinta' (slave of love). Describes someone who is excessively devoted to their romantic partner.",
+    "category": "slang",
+    "usage_note": "Often used teasingly among friends. Can be positive (devoted) or negative (blindly obedient)."
+  },
+  "mager": {
+    "meaning": "Short for 'malas gerak' (lazy to move). Describes feeling too lazy to do anything.",
+    "category": "slang",
+    "usage_note": "Common excuse to postpone activities. Widely understood across Indonesia."
+  },
+  "fomo": {
+    "meaning": "Fear Of Missing Out. Anxiety about missing interesting events or experiences others are having.",
+    "category": "gen-z",
+    "usage_note": "English acronym adopted into Indonesian slang, especially among urban youth."
+  },
+  "ygy": {
+    "meaning": "Short for 'ya gitu aja ya' or 'yah gitu ya' used as 'yeah, that's just how it is' — a casual closing or acceptance statement.",
+    "category": "gen-z",
+    "usage_note": "Chat abbreviation. Signals resignation or casual agreement. Often used as a conversation closer."
+  }
 }
