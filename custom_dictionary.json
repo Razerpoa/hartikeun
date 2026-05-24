@@ -97,6 +97,16 @@
   "ygy": {
     "meaning": "Short for 'ya gitu ya' or 'ya guys ya' used as 'yeah, that's just how it is' — a casual closing or acceptance statement.",
     "category": "gen-z",
-    "usage_note": "Chat abbreviation. Signals resignation or casual agreement. Often used as a conversation closer."
+    "usage_note": "Chat abbreviation. Signals end of statement or sentence or casual callings. Often used as a sentence closer."
+  },
+  "pmo": {
+    "meaning": "Short for Piss Me Off - a really short way to say that i am pissed",
+    "category": "gen-z",
+    "usage_note": "Chat abbreviation. Signals that he is pissed about it (but not very pissed). Often used when unhappy about something"
+  },
+  "lowkey": {
+    "meaning": "Slightly, secretly or subtly. Though often used just for emphasis",
+    "category": "gen-z",
+    "usage_note": "Used as an emphasis at the start of a sentence or a statement"
   }
 }
